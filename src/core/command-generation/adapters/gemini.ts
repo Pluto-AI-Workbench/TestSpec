@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Gemini CLI Command Adapter
  *
  * Formats commands for Gemini CLI following its TOML specification.
@@ -28,3 +28,4 @@ ${content.body}
 `;
   },
 };
+

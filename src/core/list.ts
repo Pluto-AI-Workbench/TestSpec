@@ -79,13 +79,13 @@ export class ListCommand {
     const { sort = 'recent', json = false } = options;
 
     if (mode === 'changes') {
-      const changesDir = path.join(targetPath, 'openspec', 'changes');
+      const changesDir = path.join(targetPath, 'testspec', 'changes');
 
       // Check if changes directory exists
       try {
         await fs.access(changesDir);
       } catch {
-        throw new Error("No OpenSpec changes directory found. Run 'openspec init' first.");
+        throw new Error("No TestSpec changes directory found. Run 'testspec init' first.");
       }
 
       // Get all directories in changes (excluding archive)
@@ -152,7 +152,7 @@ export class ListCommand {
     }
 
     // specs mode
-    const specsDir = path.join(targetPath, 'openspec', 'specs');
+    const specsDir = path.join(targetPath, 'testspec', 'specs');
     try {
       await fs.access(specsDir);
     } catch {

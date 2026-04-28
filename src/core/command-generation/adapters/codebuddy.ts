@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CodeBuddy Command Adapter
  *
  * Formats commands for CodeBuddy following its frontmatter specification.
@@ -30,3 +30,4 @@ ${content.body}
 `;
   },
 };
+

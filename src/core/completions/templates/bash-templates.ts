@@ -5,20 +5,20 @@
 
 export const BASH_DYNAMIC_HELPERS = `# Dynamic completion helpers
 
-_openspec_complete_changes() {
+_testspec_complete_changes() {
   local changes
-  changes=$(openspec __complete changes 2>/dev/null | cut -f1)
+  changes=$(testspec __complete changes 2>/dev/null | cut -f1)
   COMPREPLY=($(compgen -W "$changes" -- "$cur"))
 }
 
-_openspec_complete_specs() {
+_testspec_complete_specs() {
   local specs
-  specs=$(openspec __complete specs 2>/dev/null | cut -f1)
+  specs=$(testspec __complete specs 2>/dev/null | cut -f1)
   COMPREPLY=($(compgen -W "$specs" -- "$cur"))
 }
 
-_openspec_complete_items() {
+_testspec_complete_items() {
   local items
-  items=$(openspec __complete changes 2>/dev/null | cut -f1; openspec __complete specs 2>/dev/null | cut -f1)
+  items=$(testspec __complete changes 2>/dev/null | cut -f1; testspec __complete specs 2>/dev/null | cut -f1)
   COMPREPLY=($(compgen -W "$items" -- "$cur"))
 }`;

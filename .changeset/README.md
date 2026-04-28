@@ -12,9 +12,9 @@ Follow the prompts to select version bump type and describe your changes.
 
 ## Workflow
 
-1. **Add a changeset** â€” Run `pnpm changeset` locally before or after your PR
-2. **Version PR** â€” CI opens/updates a "Version Packages" PR when changesets merge to main
-3. **Release** â€” Merging the Version PR triggers npm publish and GitHub Release
+1. **Add a changeset** â€?Run `pnpm changeset` locally before or after your PR
+2. **Version PR** â€?CI opens/updates a "Version Packages" PR when changesets merge to main
+3. **Release** â€?Merging the Version PR triggers npm publish and GitHub Release
 
 > **Note:** Contributors only need to run `pnpm changeset`. Versioning (`changeset version`) and publishing happen automatically in CI.
 
@@ -24,12 +24,12 @@ Use this structure for your changeset content:
 
 ```markdown
 ---
-"@fission-ai/openspec": patch
+"@LT86.01/testspec": patch
 ---
 
 ### New Features
 
-- **Feature name** â€” What users can now do
+- **Feature name** â€?What users can now do
 
 ### Bug Fixes
 
@@ -76,7 +76,7 @@ Include only the sections relevant to your change.
 
 **Do:** Write for users, not developers
 ```markdown
-- **Shell completions** â€” Tab completion now available for Bash, Fish, and PowerShell
+- **Shell completions** â€?Tab completion now available for Bash, Fish, and PowerShell
 ```
 
 **Don't:** Write implementation details

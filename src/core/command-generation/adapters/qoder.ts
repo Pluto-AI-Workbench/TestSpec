@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Qoder Command Adapter
  *
  * Formats commands for Qoder following its frontmatter specification.
@@ -32,3 +32,4 @@ ${content.body}
 `;
   },
 };
+

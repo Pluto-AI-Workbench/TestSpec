@@ -1,51 +1,51 @@
 # Concepts
 
-This guide explains the core ideas behind OpenSpec and how they fit together. For practical usage, see [Getting Started](getting-started.md) and [Workflows](workflows.md).
+This guide explains the core ideas behind TestSpec and how they fit together. For practical usage, see [Getting Started](getting-started.md) and [Workflows](workflows.md).
 
 ## Philosophy
 
-OpenSpec is built around four principles:
+TestSpec is built around four principles:
 
 ```
-fluid not rigid         — no phase gates, work on what makes sense
-iterative not waterfall — learn as you build, refine as you go
-easy not complex        — lightweight setup, minimal ceremony
-brownfield-first        — works with existing codebases, not just greenfield
+fluid not rigid         �?no phase gates, work on what makes sense
+iterative not waterfall �?learn as you build, refine as you go
+easy not complex        �?lightweight setup, minimal ceremony
+brownfield-first        �?works with existing codebases, not just greenfield
 ```
 
 ### Why These Principles Matter
 
-**Fluid not rigid.** Traditional spec systems lock you into phases: first you plan, then you implement, then you're done. OpenSpec is more flexible — you can create artifacts in any order that makes sense for your work.
+**Fluid not rigid.** Traditional spec systems lock you into phases: first you plan, then you implement, then you're done. TestSpec is more flexible �?you can create artifacts in any order that makes sense for your work.
 
-**Iterative not waterfall.** Requirements change. Understanding deepens. What seemed like a good approach at the start might not hold up after you see the codebase. OpenSpec embraces this reality.
+**Iterative not waterfall.** Requirements change. Understanding deepens. What seemed like a good approach at the start might not hold up after you see the codebase. TestSpec embraces this reality.
 
-**Easy not complex.** Some spec frameworks require extensive setup, rigid formats, or heavyweight processes. OpenSpec stays out of your way. Initialize in seconds, start working immediately, customize only if you need to.
+**Easy not complex.** Some spec frameworks require extensive setup, rigid formats, or heavyweight processes. TestSpec stays out of your way. Initialize in seconds, start working immediately, customize only if you need to.
 
-**Brownfield-first.** Most software work isn't building from scratch — it's modifying existing systems. OpenSpec's delta-based approach makes it easy to specify changes to existing behavior, not just describe new systems.
+**Brownfield-first.** Most software work isn't building from scratch �?it's modifying existing systems. TestSpec's delta-based approach makes it easy to specify changes to existing behavior, not just describe new systems.
 
 ## The Big Picture
 
-OpenSpec organizes your work into two main areas:
+TestSpec organizes your work into two main areas:
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                        openspec/                                   │
-│                                                                    │
-│   ┌─────────────────────┐      ┌───────────────────────────────┐   │
-│   │       specs/        │      │         changes/              │   │
-│   │                     │      │                               │   │
-│   │  Source of truth    │◄─────│  Proposed modifications       │   │
-│   │  How your system    │ merge│  Each change = one folder     │   │
-│   │  currently works    │      │  Contains artifacts + deltas  │   │
-│   │                     │      │                               │   │
-│   └─────────────────────┘      └───────────────────────────────┘   │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────�?
+�?                       TestSpec/                                   �?
+�?                                                                   �?
+�?  ┌─────────────────────�?     ┌───────────────────────────────�?  �?
+�?  �?      specs/        �?     �?        changes/              �?  �?
+�?  �?                    �?     �?                              �?  �?
+�?  �? Source of truth    │◄─────�? Proposed modifications       �?  �?
+�?  �? How your system    �?merge�? Each change = one folder     �?  �?
+�?  �? currently works    �?     �? Contains artifacts + deltas  �?  �?
+�?  �?                    �?     �?                              �?  �?
+�?  └─────────────────────�?     └───────────────────────────────�?  �?
+�?                                                                   �?
+└────────────────────────────────────────────────────────────────────�?
 ```
 
-**Specs** are the source of truth — they describe how your system currently behaves.
+**Specs** are the source of truth �?they describe how your system currently behaves.
 
-**Changes** are proposed modifications — they live in separate folders until you're ready to merge them.
+**Changes** are proposed modifications �?they live in separate folders until you're ready to merge them.
 
 This separation is key. You can work on multiple changes in parallel without conflicts. You can review a change before it affects the main specs. And when you archive a change, its deltas merge cleanly into the source of truth.
 
@@ -56,18 +56,18 @@ Specs describe your system's behavior using structured requirements and scenario
 ### Structure
 
 ```
-openspec/specs/
+TestSpec/specs/
 ├── auth/
-│   └── spec.md           # Authentication behavior
+�?  └── spec.md           # Authentication behavior
 ├── payments/
-│   └── spec.md           # Payment processing
+�?  └── spec.md           # Payment processing
 ├── notifications/
-│   └── spec.md           # Notification system
+�?  └── spec.md           # Notification system
 └── ui/
     └── spec.md           # UI behavior and themes
 ```
 
-Organize specs by domain — logical groupings that make sense for your system. Common patterns:
+Organize specs by domain �?logical groupings that make sense for your system. Common patterns:
 
 - **By feature area**: `auth/`, `payments/`, `search/`
 - **By component**: `api/`, `frontend/`, `workers/`
@@ -121,17 +121,17 @@ The system MUST expire sessions after 30 minutes of inactivity.
 
 ### Why Structure Specs This Way
 
-**Requirements are the "what"** — they state what the system should do without specifying implementation.
+**Requirements are the "what"** �?they state what the system should do without specifying implementation.
 
-**Scenarios are the "when"** — they provide concrete examples that can be verified. Good scenarios:
+**Scenarios are the "when"** �?they provide concrete examples that can be verified. Good scenarios:
 - Are testable (you could write an automated test for them)
 - Cover both happy path and edge cases
 - Use Given/When/Then or similar structured format
 
 **RFC 2119 keywords** (SHALL, MUST, SHOULD, MAY) communicate intent:
-- **MUST/SHALL** — absolute requirement
-- **SHOULD** — recommended, but exceptions exist
-- **MAY** — optional
+- **MUST/SHALL** �?absolute requirement
+- **SHOULD** �?recommended, but exceptions exist
+- **MAY** �?optional
 
 ### What a Spec Is (and Is Not)
 
@@ -154,7 +154,7 @@ Quick test:
 
 ### Keep It Lightweight: Progressive Rigor
 
-OpenSpec aims to avoid bureaucracy. Use the lightest level that still makes the change verifiable.
+TestSpec aims to avoid bureaucracy. Use the lightest level that still makes the change verifiable.
 
 **Lite spec (default):**
 - Short behavior-first requirements
@@ -186,20 +186,20 @@ A change is a proposed modification to your system, packaged as a folder with ev
 ### Change Structure
 
 ```
-openspec/changes/add-dark-mode/
+TestSpec/changes/add-dark-mode/
 ├── proposal.md           # Why and what
 ├── design.md             # How (technical approach)
 ├── tasks.md              # Implementation checklist
-├── .openspec.yaml        # Change metadata (optional)
+├── .TestSpec.yaml        # Change metadata (optional)
 └── specs/                # Delta specs
     └── ui/
         └── spec.md       # What's changing in ui/spec.md
 ```
 
 Each change is self-contained. It has:
-- **Artifacts** — documents that capture intent, design, and tasks
-- **Delta specs** — specifications for what's being added, modified, or removed
-- **Metadata** — optional configuration for this specific change
+- **Artifacts** �?documents that capture intent, design, and tasks
+- **Delta specs** �?specifications for what's being added, modified, or removed
+- **Metadata** �?optional configuration for this specific change
 
 ### Why Changes Are Folders
 
@@ -211,7 +211,7 @@ Packaging a change as a folder has several benefits:
 
 3. **Clean history.** When archived, changes move to `changes/archive/` with their full context preserved. You can look back and understand not just what changed, but why.
 
-4. **Review-friendly.** A change folder is easy to review — open it, read the proposal, check the design, see the spec deltas.
+4. **Review-friendly.** A change folder is easy to review �?open it, read the proposal, check the design, see the spec deltas.
 
 ## Artifacts
 
@@ -220,8 +220,8 @@ Artifacts are the documents within a change that guide the work.
 ### The Artifact Flow
 
 ```
-proposal ──────► specs ──────► design ──────► tasks ──────► implement
-    │               │             │              │
+proposal ──────�?specs ──────�?design ──────�?tasks ──────�?implement
+    �?              �?            �?             �?
    why            what           how          steps
  + scope        changes       approach      to take
 ```
@@ -294,11 +294,11 @@ Using CSS variables instead of CSS-in-JS because:
 ## Data Flow
 ```
 ThemeProvider (context)
-       │
-       ▼
-ThemeToggle ◄──► localStorage
-       │
-       ▼
+       �?
+       �?
+ThemeToggle ◄──�?localStorage
+       �?
+       �?
 CSS Variables (applied to :root)
 ```
 
@@ -315,7 +315,7 @@ CSS Variables (applied to :root)
 
 #### Tasks (`tasks.md`)
 
-Tasks are the **implementation checklist** — concrete steps with checkboxes.
+Tasks are the **implementation checklist** �?concrete steps with checkboxes.
 
 ```markdown
 # Tasks
@@ -345,7 +345,7 @@ Tasks are the **implementation checklist** — concrete steps with checkboxes.
 
 ## Delta Specs
 
-Delta specs are the key concept that makes OpenSpec work for brownfield development. They describe **what's changing** rather than restating the entire spec.
+Delta specs are the key concept that makes TestSpec work for brownfield development. They describe **what's changing** rather than restating the entire spec.
 
 ### The Format
 
@@ -411,7 +411,7 @@ Schemas define the artifact types and their dependencies for a workflow.
 ### How Schemas Work
 
 ```yaml
-# openspec/schemas/spec-driven/schema.yaml
+# TestSpec/schemas/spec-driven/schema.yaml
 name: spec-driven
 artifacts:
   - id: proposal
@@ -436,23 +436,23 @@ artifacts:
 ```
                     proposal
                    (root node)
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
+                       �?
+         ┌─────────────┴─────────────�?
+         �?                          �?
+         �?                          �?
       specs                       design
    (requires:                  (requires:
     proposal)                   proposal)
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-                       ▼
+         �?                          �?
+         └─────────────┬─────────────�?
+                       �?
+                       �?
                     tasks
                 (requires:
                 specs, design)
 ```
 
-**Dependencies are enablers, not gates.** They show what's possible to create, not what you must create next. You can skip design if you don't need it. You can create specs before or after design — both depend only on proposal.
+**Dependencies are enablers, not gates.** They show what's possible to create, not what you must create next. You can skip design if you don't need it. You can create specs before or after design �?both depend only on proposal.
 
 ### Built-in Schemas
 
@@ -461,7 +461,7 @@ artifacts:
 The standard workflow for spec-driven development:
 
 ```
-proposal → specs → design → tasks → implement
+proposal �?specs �?design �?tasks �?implement
 ```
 
 Best for: Most feature work where you want to agree on specs before implementation.
@@ -472,16 +472,16 @@ Create custom schemas for your team's workflow:
 
 ```bash
 # Create from scratch
-openspec schema init research-first
+TestSpec schema init research-first
 
 # Or fork an existing one
-openspec schema fork spec-driven research-first
+TestSpec schema fork spec-driven research-first
 ```
 
 **Example custom schema:**
 
 ```yaml
-# openspec/schemas/research-first/schema.yaml
+# TestSpec/schemas/research-first/schema.yaml
 name: research-first
 artifacts:
   - id: research
@@ -508,26 +508,26 @@ Archiving completes a change by merging its delta specs into the main specs and 
 ```
 Before archive:
 
-openspec/
+TestSpec/
 ├── specs/
-│   └── auth/
-│       └── spec.md ◄────────────────┐
-└── changes/                         │
-    └── add-2fa/                     │
-        ├── proposal.md              │
-        ├── design.md                │ merge
-        ├── tasks.md                 │
-        └── specs/                   │
-            └── auth/                │
-                └── spec.md ─────────┘
+�?  └── auth/
+�?      └── spec.md ◄────────────────�?
+└── changes/                         �?
+    └── add-2fa/                     �?
+        ├── proposal.md              �?
+        ├── design.md                �?merge
+        ├── tasks.md                 �?
+        └── specs/                   �?
+            └── auth/                �?
+                └── spec.md ─────────�?
 
 
 After archive:
 
-openspec/
+TestSpec/
 ├── specs/
-│   └── auth/
-│       └── spec.md        # Now includes 2FA requirements
+�?  └── auth/
+�?      └── spec.md        # Now includes 2FA requirements
 └── changes/
     └── archive/
         └── 2025-01-24-add-2fa/    # Preserved for history
@@ -551,49 +551,49 @@ openspec/
 
 **Clean state.** Active changes (`changes/`) shows only work in progress. Completed work moves out of the way.
 
-**Audit trail.** The archive preserves the full context of every change — not just what changed, but the proposal explaining why, the design explaining how, and the tasks showing the work done.
+**Audit trail.** The archive preserves the full context of every change �?not just what changed, but the proposal explaining why, the design explaining how, and the tasks showing the work done.
 
 **Spec evolution.** Specs grow organically as changes are archived. Each archive merges its deltas, building up a comprehensive specification over time.
 
 ## How It All Fits Together
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              OPENSPEC FLOW                                   │
-│                                                                              │
-│   ┌────────────────┐                                                         │
-│   │  1. START      │  /opsx:propose (core) or /opsx:new (expanded)           │
-│   │     CHANGE     │                                                         │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  2. CREATE     │  /opsx:ff or /opsx:continue (expanded workflow)         │
-│   │     ARTIFACTS  │  Creates proposal → specs → design → tasks              │
-│   │                │  (based on schema dependencies)                         │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  3. IMPLEMENT  │  /opsx:apply                                            │
-│   │     TASKS      │  Work through tasks, checking them off                  │
-│   │                │◄──── Update artifacts as you learn                      │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐                                                         │
-│   │  4. VERIFY     │  /opsx:verify (optional)                                │
-│   │     WORK       │  Check implementation matches specs                     │
-│   └───────┬────────┘                                                         │
-│           │                                                                  │
-│           ▼                                                                  │
-│   ┌────────────────┐     ┌──────────────────────────────────────────────┐    │
-│   │  5. ARCHIVE    │────►│  Delta specs merge into main specs           │    │
-│   │     CHANGE     │     │  Change folder moves to archive/             │    │
-│   └────────────────┘     │  Specs are now the updated source of truth   │    │
-│                          └──────────────────────────────────────────────┘    │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────�?
+�?                             TestSpec FLOW                                   �?
+�?                                                                             �?
+�?  ┌────────────────�?                                                        �?
+�?  �? 1. START      �? /testspec:propose (core) or /testspec:new (expanded)           �?
+�?  �?    CHANGE     �?                                                        �?
+�?  └───────┬────────�?                                                        �?
+�?          �?                                                                 �?
+�?          �?                                                                 �?
+�?  ┌────────────────�?                                                        �?
+�?  �? 2. CREATE     �? /testspec:ff or /testspec:continue (expanded workflow)         �?
+�?  �?    ARTIFACTS  �? Creates proposal �?specs �?design �?tasks              �?
+�?  �?               �? (based on schema dependencies)                         �?
+�?  └───────┬────────�?                                                        �?
+�?          �?                                                                 �?
+�?          �?                                                                 �?
+�?  ┌────────────────�?                                                        �?
+�?  �? 3. IMPLEMENT  �? /testspec:apply                                            �?
+�?  �?    TASKS      �? Work through tasks, checking them off                  �?
+�?  �?               │◄──── Update artifacts as you learn                      �?
+�?  └───────┬────────�?                                                        �?
+�?          �?                                                                 �?
+�?          �?                                                                 �?
+�?  ┌────────────────�?                                                        �?
+�?  �? 4. VERIFY     �? /testspec:verify (optional)                                �?
+�?  �?    WORK       �? Check implementation matches specs                     �?
+�?  └───────┬────────�?                                                        �?
+�?          �?                                                                 �?
+�?          �?                                                                 �?
+�?  ┌────────────────�?    ┌──────────────────────────────────────────────�?   �?
+�?  �? 5. ARCHIVE    │────►│  Delta specs merge into main specs           �?   �?
+�?  �?    CHANGE     �?    �? Change folder moves to archive/             �?   �?
+�?  └────────────────�?    �? Specs are now the updated source of truth   �?   �?
+�?                         └──────────────────────────────────────────────�?   �?
+�?                                                                             �?
+└──────────────────────────────────────────────────────────────────────────────�?
 ```
 
 **The virtuous cycle:**
@@ -618,7 +618,7 @@ openspec/
 | **Scenario** | A concrete example of a requirement, typically in Given/When/Then format |
 | **Schema** | A definition of artifact types and their dependencies |
 | **Spec** | A specification describing system behavior, containing requirements and scenarios |
-| **Source of truth** | The `openspec/specs/` directory, containing the current agreed-upon behavior |
+| **Source of truth** | The `TestSpec/specs/` directory, containing the current agreed-upon behavior |
 
 ## Next Steps
 

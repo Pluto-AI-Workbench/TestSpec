@@ -8,7 +8,7 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 
 export function getOpsxProposeSkillTemplate(): SkillTemplate {
   return {
-    name: 'openspec-propose',
+    name: 'testspec-propose',
     description: 'Propose a new change with all artifacts generated in one step. Use when the user wants to quickly describe what they want to build and get a complete proposal with design, specs, and tasks ready for implementation.',
     instructions: `Propose a new change - create the change and generate all artifacts in one step.
 
@@ -17,7 +17,7 @@ I'll create a change with artifacts:
 - design.md (how)
 - tasks.md (implementation steps)
 
-When ready to implement, run /opsx:apply
+When ready to implement, run /testspec:apply
 
 ---
 
@@ -36,13 +36,13 @@ When ready to implement, run /opsx:apply
 
 2. **Create the change directory**
    \`\`\`bash
-   openspec new change "<name>"
+   testspec new change "<name>"
    \`\`\`
-   This creates a scaffolded change at \`openspec/changes/<name>/\` with \`.openspec.yaml\`.
+   This creates a scaffolded change at \`testspec/changes/<name>/\` with \`.testspec.yaml\`.
 
 3. **Get the artifact build order**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to get:
    - \`applyRequires\`: array of artifact IDs needed before implementation (e.g., \`["tasks"]\`)
@@ -57,7 +57,7 @@ When ready to implement, run /opsx:apply
    a. **For each artifact that is \`ready\` (dependencies satisfied)**:
       - Get instructions:
         \`\`\`bash
-        openspec instructions <artifact-id> --change "<name>" --json
+        testspec instructions <artifact-id> --change "<name>" --json
         \`\`\`
       - The instructions JSON includes:
         - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -72,7 +72,7 @@ When ready to implement, run /opsx:apply
       - Show brief progress: "Created <artifact-id>"
 
    b. **Continue until all \`applyRequires\` artifacts are complete**
-      - After creating each artifact, re-run \`openspec status --change "<name>" --json\`
+      - After creating each artifact, re-run \`testspec status --change "<name>" --json\`
       - Check if every artifact ID in \`applyRequires\` has \`status: "done"\` in the artifacts array
       - Stop when all \`applyRequires\` artifacts are done
 
@@ -82,7 +82,7 @@ When ready to implement, run /opsx:apply
 
 5. **Show final status**
    \`\`\`bash
-   openspec status --change "<name>"
+   testspec status --change "<name>"
    \`\`\`
 
 **Output**
@@ -91,11 +91,11 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Run \`/opsx:apply\` or ask me to implement to start working on the tasks."
+- Prompt: "Run \`/testspec:apply\` or ask me to implement to start working on the tasks."
 
 **Artifact Creation Guidelines**
 
-- Follow the \`instruction\` field from \`openspec instructions\` for each artifact type
+- Follow the \`instruction\` field from \`testspec instructions\` for each artifact type
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
 - Use \`template\` as the structure for your output file - fill in its sections
@@ -110,14 +110,14 @@ After completing all artifacts, summarize:
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
-    metadata: { author: 'openspec', version: '1.0' },
+    compatibility: 'Requires testspec CLI.',
+    metadata: { author: 'testspec', version: '1.0' },
   };
 }
 
 export function getOpsxProposeCommandTemplate(): CommandTemplate {
   return {
-    name: 'OPSX: Propose',
+    name: 'TESTSPEC: Propose',
     description: 'Propose a new change - create it and generate all artifacts in one step',
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
@@ -128,11 +128,11 @@ I'll create a change with artifacts:
 - design.md (how)
 - tasks.md (implementation steps)
 
-When ready to implement, run /opsx:apply
+When ready to implement, run /testspec:apply
 
 ---
 
-**Input**: The argument after \`/opsx:propose\` is the change name (kebab-case), OR a description of what the user wants to build.
+**Input**: The argument after \`/testspec:propose\` is the change name (kebab-case), OR a description of what the user wants to build.
 
 **Steps**
 
@@ -147,13 +147,13 @@ When ready to implement, run /opsx:apply
 
 2. **Create the change directory**
    \`\`\`bash
-   openspec new change "<name>"
+   testspec new change "<name>"
    \`\`\`
-   This creates a scaffolded change at \`openspec/changes/<name>/\` with \`.openspec.yaml\`.
+   This creates a scaffolded change at \`testspec/changes/<name>/\` with \`.testspec.yaml\`.
 
 3. **Get the artifact build order**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to get:
    - \`applyRequires\`: array of artifact IDs needed before implementation (e.g., \`["tasks"]\`)
@@ -168,7 +168,7 @@ When ready to implement, run /opsx:apply
    a. **For each artifact that is \`ready\` (dependencies satisfied)**:
       - Get instructions:
         \`\`\`bash
-        openspec instructions <artifact-id> --change "<name>" --json
+        testspec instructions <artifact-id> --change "<name>" --json
         \`\`\`
       - The instructions JSON includes:
         - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -183,7 +183,7 @@ When ready to implement, run /opsx:apply
       - Show brief progress: "Created <artifact-id>"
 
    b. **Continue until all \`applyRequires\` artifacts are complete**
-      - After creating each artifact, re-run \`openspec status --change "<name>" --json\`
+      - After creating each artifact, re-run \`testspec status --change "<name>" --json\`
       - Check if every artifact ID in \`applyRequires\` has \`status: "done"\` in the artifacts array
       - Stop when all \`applyRequires\` artifacts are done
 
@@ -193,7 +193,7 @@ When ready to implement, run /opsx:apply
 
 5. **Show final status**
    \`\`\`bash
-   openspec status --change "<name>"
+   testspec status --change "<name>"
    \`\`\`
 
 **Output**
@@ -202,11 +202,11 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Run \`/opsx:apply\` to start implementing."
+- Prompt: "Run \`/testspec:apply\` to start implementing."
 
 **Artifact Creation Guidelines**
 
-- Follow the \`instruction\` field from \`openspec instructions\` for each artifact type
+- Follow the \`instruction\` field from \`testspec instructions\` for each artifact type
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
 - Use \`template\` as the structure for your output file - fill in its sections

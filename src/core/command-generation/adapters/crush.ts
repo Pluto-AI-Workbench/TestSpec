@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Crush Command Adapter
  *
  * Formats commands for Crush following its frontmatter specification.
@@ -32,3 +32,4 @@ ${content.body}
 `;
   },
 };
+

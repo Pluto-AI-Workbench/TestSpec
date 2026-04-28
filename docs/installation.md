@@ -2,46 +2,46 @@
 
 ## Prerequisites
 
-- **Node.js 20.19.0 or higher** â€” Check your version: `node --version`
+- **Node.js 20.19.0 or higher** â€?Check your version: `node --version`
 
 ## Package Managers
 
 ### npm
 
 ```bash
-npm install -g @fission-ai/openspec@latest
+npm install -g @Pluto-AI-Workbench/TestSpec@latest
 ```
 
 ### pnpm
 
 ```bash
-pnpm add -g @fission-ai/openspec@latest
+pnpm add -g @Pluto-AI-Workbench/TestSpec@latest
 ```
 
 ### yarn
 
 ```bash
-yarn global add @fission-ai/openspec@latest
+yarn global add @Pluto-AI-Workbench/TestSpec@latest
 ```
 
 ### bun
 
 ```bash
-bun add -g @fission-ai/openspec@latest
+bun add -g @Pluto-AI-Workbench/TestSpec@latest
 ```
 
 ## Nix
 
-Run OpenSpec directly without installation:
+Run TestSpec directly without installation:
 
 ```bash
-nix run github:Fission-AI/OpenSpec -- init
+nix run github:Pluto-AI-Workbench/TestSpec -- init
 ```
 
 Or install to your profile:
 
 ```bash
-nix profile install github:Fission-AI/OpenSpec
+nix profile install github:Pluto-AI-Workbench/TestSpec
 ```
 
 Or add to your development environment in `flake.nix`:
@@ -50,12 +50,12 @@ Or add to your development environment in `flake.nix`:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    openspec.url = "github:Fission-AI/OpenSpec";
+    TestSpec.url = "github:Pluto-AI-Workbench/TestSpec";
   };
 
-  outputs = { nixpkgs, openspec, ... }: {
+  outputs = { nixpkgs, TestSpec, ... }: {
     devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
-      buildInputs = [ openspec.packages.x86_64-linux.default ];
+      buildInputs = [ TestSpec.packages.x86_64-linux.default ];
     };
   };
 }
@@ -64,16 +64,16 @@ Or add to your development environment in `flake.nix`:
 ## Verify Installation
 
 ```bash
-openspec --version
+TestSpec --version
 ```
 
 ## Next Steps
 
-After installing, initialize OpenSpec in your project:
+After installing, initialize TestSpec in your project:
 
 ```bash
 cd your-project
-openspec init
+TestSpec init
 ```
 
 See [Getting Started](getting-started.md) for a full walkthrough.

@@ -1,21 +1,21 @@
 {
-  "name": "@fission-ai/openspec",
+  "name": "@LT86.01/testspec",
   "version": "1.3.1",
   "description": "AI-native system for spec-driven development",
   "keywords": [
-    "openspec",
+    "testspec",
     "specs",
     "cli",
     "ai",
     "development"
   ],
-  "homepage": "https://github.com/Fission-AI/OpenSpec",
+  "homepage": "https://github.com/Pluto-AI-Workbench/TestSpec",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Fission-AI/OpenSpec"
+    "url": "https://github.com/Pluto-AI-Workbench/TestSpec"
   },
   "license": "MIT",
-  "author": "OpenSpec Contributors",
+  "author": "TestSpec Contributors",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -27,7 +27,7 @@
     }
   },
   "bin": {
-    "openspec": "./bin/openspec.js"
+    "testspec": "./bin/testspec.js"
   },
   "files": [
     "dist",
@@ -42,7 +42,7 @@
     "lint": "eslint src/",
     "build": "node build.js",
     "dev": "tsc --watch",
-    "dev:cli": "pnpm build && node bin/openspec.js",
+    "dev:cli": "pnpm build && node bin/testspec.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

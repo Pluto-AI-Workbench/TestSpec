@@ -53,12 +53,12 @@ function main() {
   let tgzPath;
 
   try {
-    log(`Packing @fission-ai/openspec@${expected}...`);
+    log(`Packing @LT86.01/testspec@${expected}...`);
     const filename = npmPack();
     tgzPath = path.resolve(filename);
     log(`Created: ${tgzPath}`);
 
-    work = mkdtempSync(path.join(tmpdir(), 'openspec-pack-check-'));
+    work = mkdtempSync(path.join(tmpdir(), 'testspec-pack-check-'));
     log(`Temp dir: ${work}`);
 
     // Make a tiny project
@@ -80,7 +80,7 @@ function main() {
     run('npm', ['install', tgzPath, '--silent', '--no-audit', '--no-fund'], { cwd: work, env });
 
     // Run the installed CLI via Node to avoid bin resolution/platform issues
-    const binRel = path.join('node_modules', '@fission-ai', 'openspec', 'bin', 'openspec.js');
+    const binRel = path.join('node_modules', '@LT86.01', 'testspec', 'bin', 'testspec.js');
     const actual = run(process.execPath, [binRel, '--version'], { cwd: work }).trim();
 
     if (actual !== expected) {
@@ -104,8 +104,8 @@ function main() {
 
 try {
   main();
-  console.log('✅ pack-version-check: OK');
+  console.log('�?pack-version-check: OK');
 } catch (err) {
-  console.error(`❌ pack-version-check: ${err.message}`);
+  console.error(`�?pack-version-check: ${err.message}`);
   process.exit(1);
 }

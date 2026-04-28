@@ -1,6 +1,6 @@
 # Dev Container Setup
 
-This directory contains the VS Code dev container configuration for OpenSpec development.
+This directory contains the VS Code dev container configuration for TestSpec development.
 
 ## What's Included
 
@@ -68,7 +68,7 @@ Your SSH keys are mounted read-only from `~/.ssh`, so git operations work seamle
 ### Rebuilding the Container
 
 If you modify `.devcontainer/devcontainer.json`:
-- Command Palette â†’ "Dev Containers: Rebuild Container"
+- Command Palette â†?"Dev Containers: Rebuild Container"
 
 ## Benefits
 

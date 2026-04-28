@@ -17,17 +17,17 @@ const ART_COLUMN_WIDTH = 24;
  */
 function getWelcomeText(): string[] {
   return [
-    chalk.white.bold('Welcome to OpenSpec'),
+    chalk.white.bold('Welcome to TestSpec'),
     chalk.dim('A lightweight spec-driven framework'),
     '',
     chalk.white('This setup will configure:'),
     chalk.dim('  • Agent Skills for AI tools'),
-    chalk.dim('  • /opsx:* slash commands'),
+    chalk.dim('  • /testspec:* slash commands'),
     '',
     chalk.white('Quick start after setup:'),
-    `  ${chalk.yellow('/opsx:new')}      ${chalk.dim('Create a change')}`,
-    `  ${chalk.yellow('/opsx:continue')} ${chalk.dim('Next artifact')}`,
-    `  ${chalk.yellow('/opsx:apply')}    ${chalk.dim('Implement tasks')}`,
+    `  ${chalk.yellow('/testspec:new')}      ${chalk.dim('Create a change')}`,
+    `  ${chalk.yellow('/testspec:continue')} ${chalk.dim('Next artifact')}`,
+    `  ${chalk.yellow('/testspec:apply')}    ${chalk.dim('Implement tasks')}`,
     '',
     chalk.cyan('Press Enter to select tools...'),
   ];

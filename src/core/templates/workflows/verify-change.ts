@@ -8,7 +8,7 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 
 export function getVerifyChangeSkillTemplate(): SkillTemplate {
   return {
-    name: 'openspec-verify-change',
+    name: 'testspec-verify-change',
     description: 'Verify implementation matches change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent before archiving.',
     instructions: `Verify that an implementation matches the change artifacts (specs, tasks, design).
 
@@ -18,7 +18,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 
 1. **If no change name provided, prompt for selection**
 
-   Run \`openspec list --json\` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   Run \`testspec list --json\` to get available changes. Use the **AskUserQuestion tool** to let the user select.
 
    Show changes that have implementation tasks (tasks artifact exists).
    Include the schema used for each change if available.
@@ -28,7 +28,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -37,7 +37,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 3. **Get the change directory and load artifacts**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   testspec instructions apply --change "<name>" --json
    \`\`\`
 
    This returns the change directory and \`contextFiles\` (artifact ID -> array of concrete file paths). Read all available artifacts from \`contextFiles\`.
@@ -62,7 +62,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Spec Coverage**:
-   - If delta specs exist in \`openspec/changes/<name>/specs/\`:
+   - If delta specs exist in \`testspec/changes/<name>/specs/\`:
      - Extract all requirements (marked with "### Requirement:")
      - For each requirement:
        - Search codebase for keywords related to the requirement
@@ -168,26 +168,26 @@ Use clear markdown with:
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
-    metadata: { author: 'openspec', version: '1.0' },
+    compatibility: 'Requires testspec CLI.',
+    metadata: { author: 'testspec', version: '1.0' },
   };
 }
 
 export function getOpsxVerifyCommandTemplate(): CommandTemplate {
   return {
-    name: 'OPSX: Verify',
+    name: 'TESTSPEC: Verify',
     description: 'Verify implementation matches change artifacts before archiving',
     category: 'Workflow',
     tags: ['workflow', 'verify', 'experimental'],
     content: `Verify that an implementation matches the change artifacts (specs, tasks, design).
 
-**Input**: Optionally specify a change name after \`/opsx:verify\` (e.g., \`/opsx:verify add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: Optionally specify a change name after \`/testspec:verify\` (e.g., \`/testspec:verify add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
 
 1. **If no change name provided, prompt for selection**
 
-   Run \`openspec list --json\` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   Run \`testspec list --json\` to get available changes. Use the **AskUserQuestion tool** to let the user select.
 
    Show changes that have implementation tasks (tasks artifact exists).
    Include the schema used for each change if available.
@@ -197,7 +197,7 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -206,7 +206,7 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
 3. **Get the change directory and load artifacts**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   testspec instructions apply --change "<name>" --json
    \`\`\`
 
    This returns the change directory and \`contextFiles\` (artifact ID -> array of concrete file paths). Read all available artifacts from \`contextFiles\`.
@@ -231,7 +231,7 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Spec Coverage**:
-   - If delta specs exist in \`openspec/changes/<name>/specs/\`:
+   - If delta specs exist in \`testspec/changes/<name>/specs/\`:
      - Extract all requirements (marked with "### Requirement:")
      - For each requirement:
        - Search codebase for keywords related to the requirement

@@ -1,6 +1,6 @@
 # Workflows
 
-This guide covers common workflow patterns for OpenSpec and when to use each one. For basic setup, see [Getting Started](getting-started.md). For command reference, see [Commands](commands.md).
+This guide covers common workflow patterns for TestSpec and when to use each one. For basic setup, see [Getting Started](getting-started.md). For command reference, see [Commands](commands.md).
 
 ## Philosophy: Actions, Not Phases
 
@@ -11,14 +11,14 @@ OPSX takes a different approach:
 ```text
 Traditional (phase-locked):
 
-  PLANNING ────────► IMPLEMENTING ────────► DONE
-      │                    │
-      │   "Can't go back"  │
-      └────────────────────┘
+  PLANNING ────────�?IMPLEMENTING ────────�?DONE
+      �?                   �?
+      �?  "Can't go back"  �?
+      └────────────────────�?
 
 OPSX (fluid actions):
 
-  proposal ──► specs ──► design ──► tasks ──► implement
+  proposal ──�?specs ──�?design ──�?tasks ──�?implement
 ```
 
 **Key principles:**
@@ -33,24 +33,24 @@ OPSX (fluid actions):
 ### Default Quick Path (`core` profile)
 
 New installs default to `core`, which provides:
-- `/opsx:propose`
-- `/opsx:explore`
-- `/opsx:apply`
-- `/opsx:archive`
+- `/testspec:propose`
+- `/testspec:explore`
+- `/testspec:apply`
+- `/testspec:archive`
 
 Typical flow:
 
 ```text
-/opsx:propose ──► /opsx:apply ──► /opsx:archive
+/testspec:propose ──�?/testspec:apply ──�?/testspec:archive
 ```
 
 ### Expanded/Full Workflow (custom selection)
 
-If you want explicit scaffold-and-build commands (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), enable them with:
+If you want explicit scaffold-and-build commands (`/testspec:new`, `/testspec:continue`, `/testspec:ff`, `/testspec:verify`, `/testspec:sync`, `/testspec:bulk-archive`, `/testspec:onboard`), enable them with:
 
 ```bash
-openspec config profile
-openspec update
+TestSpec config profile
+TestSpec update
 ```
 
 ## Workflow Patterns (Expanded Mode)
@@ -60,38 +60,38 @@ openspec update
 When you know what you want to build and just need to execute:
 
 ```text
-/opsx:new ──► /opsx:ff ──► /opsx:apply ──► /opsx:verify ──► /opsx:archive
+/testspec:new ──�?/testspec:ff ──�?/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
 ```
 
 **Example conversation:**
 
 ```text
-You: /opsx:new add-logout-button
+You: /testspec:new add-logout-button
 
-AI:  Created openspec/changes/add-logout-button/
+AI:  Created TestSpec/changes/add-logout-button/
      Ready to create: proposal
 
-You: /opsx:ff
+You: /testspec:ff
 
 AI:  Creating all planning artifacts...
-     ✓ proposal.md
-     ✓ specs/
-     ✓ design.md
-     ✓ tasks.md
+     �?proposal.md
+     �?specs/
+     �?design.md
+     �?tasks.md
      Ready for implementation!
 
-You: /opsx:apply
+You: /testspec:apply
 
 AI:  Working through tasks...
-     ✓ Added logout button to header
-     ✓ Implemented session clearing
-     ✓ Added confirmation dialog
+     �?Added logout button to header
+     �?Implemented session clearing
+     �?Added confirmation dialog
      All tasks complete!
 
-You: /opsx:archive
+You: /testspec:archive
 
-AI:  ✓ Merged specs
-     ✓ Archived change
+AI:  �?Merged specs
+     �?Archived change
 ```
 
 **Best for:** Small to medium features, bug fixes, straightforward changes.
@@ -101,13 +101,13 @@ AI:  ✓ Merged specs
 When requirements are unclear or you need to investigate first:
 
 ```text
-/opsx:explore ──► /opsx:new ──► /opsx:continue ──► ... ──► /opsx:apply
+/testspec:explore ──�?/testspec:new ──�?/testspec:continue ──�?... ──�?/testspec:apply
 ```
 
 **Example conversation:**
 
 ```text
-You: /opsx:explore
+You: /testspec:explore
 
 AI:  What would you like to explore?
 
@@ -127,11 +127,11 @@ AI:  Let me help investigate...
 
 You: Let's tackle the data fetching issue.
 
-You: /opsx:new optimize-product-list-fetching
+You: /testspec:new optimize-product-list-fetching
 
 AI:  Created change. Ready to create: proposal
 
-You: /opsx:continue
+You: /testspec:continue
 
 AI:  Creating proposal based on our exploration...
      [Writes proposal incorporating investigation insights]
@@ -139,7 +139,7 @@ AI:  Creating proposal based on our exploration...
      Ready to create: specs, design
      Which would you like next?
 
-You: /opsx:continue
+You: /testspec:continue
 
 AI:  Creating specs...
 ```
@@ -151,11 +151,11 @@ AI:  Creating specs...
 Work on multiple changes at once:
 
 ```text
-Change A: /opsx:new ──► /opsx:ff ──► /opsx:apply (in progress)
-                                         │
+Change A: /testspec:new ──�?/testspec:ff ──�?/testspec:apply (in progress)
+                                         �?
                                     context switch
-                                         │
-Change B: /opsx:new ──► /opsx:ff ──────► /opsx:apply
+                                         �?
+Change B: /testspec:new ──�?/testspec:ff ──────�?/testspec:apply
 ```
 
 **Example conversation:**
@@ -163,27 +163,27 @@ Change B: /opsx:new ──► /opsx:ff ──────► /opsx:apply
 ```text
 You: I'm working on add-dark-mode but got pulled into a bug fix
 
-You: /opsx:new fix-login-redirect
+You: /testspec:new fix-login-redirect
 
-AI:  Created openspec/changes/fix-login-redirect/
+AI:  Created TestSpec/changes/fix-login-redirect/
 
-You: /opsx:ff
+You: /testspec:ff
 
-AI:  ✓ Created planning artifacts
+AI:  �?Created planning artifacts
 
-You: /opsx:apply
+You: /testspec:apply
 
 AI:  Working on fix-login-redirect...
      [Implements the fix]
      All tasks complete!
 
-You: /opsx:archive
+You: /testspec:archive
 
-AI:  ✓ Archived fix-login-redirect
+AI:  �?Archived fix-login-redirect
 
 You: Let's get back to dark mode
 
-You: /opsx:apply add-dark-mode
+You: /testspec:apply add-dark-mode
 
 AI:  Resuming add-dark-mode...
      Picking up at task 2.3: Update Header...
@@ -191,10 +191,10 @@ AI:  Resuming add-dark-mode...
 
 **Best for:** Parallel work streams, urgent interrupts, team collaboration.
 
-When you have multiple completed changes, use `/opsx:bulk-archive`:
+When you have multiple completed changes, use `/testspec:bulk-archive`:
 
 ```text
-You: /opsx:bulk-archive
+You: /testspec:bulk-archive
 
 AI:  Found 3 completed changes:
      - add-dark-mode (all tasks done)
@@ -202,7 +202,7 @@ AI:  Found 3 completed changes:
      - update-footer (all tasks done)
 
      Checking for spec conflicts...
-     ⚠ add-dark-mode and update-footer both touch specs/ui/
+     �?add-dark-mode and update-footer both touch specs/ui/
 
      Inspecting codebase to resolve...
      Both changes are implemented. Will apply in chronological order.
@@ -211,10 +211,10 @@ AI:  Found 3 completed changes:
 
 You: Yes
 
-AI:  ✓ Archived add-dark-mode
-     ✓ Archived fix-login-redirect
-     ✓ Archived update-footer
-     Specs merged in order: add-dark-mode → update-footer
+AI:  �?Archived add-dark-mode
+     �?Archived fix-login-redirect
+     �?Archived update-footer
+     Specs merged in order: add-dark-mode �?update-footer
 ```
 
 Bulk archive detects when multiple changes touch the same specs and resolves conflicts by checking what's actually implemented.
@@ -224,35 +224,35 @@ Bulk archive detects when multiple changes touch the same specs and resolves con
 The recommended completion flow:
 
 ```text
-/opsx:apply ──► /opsx:verify ──► /opsx:archive
-                    │                 │
+/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
+                    �?                �?
               validates          prompts to sync
               implementation     if needed
 ```
 
 #### Verify: Check Your Work
 
-`/opsx:verify` validates implementation against your artifacts across three dimensions:
+`/testspec:verify` validates implementation against your artifacts across three dimensions:
 
 ```text
-You: /opsx:verify
+You: /testspec:verify
 
 AI:  Verifying add-auth...
 
      COMPLETENESS
-     ✓ All 12 tasks in tasks.md are checked
-     ✓ All requirements in specs have corresponding code
-     ⚠ Scenario "Session timeout after inactivity" not tested
+     �?All 12 tasks in tasks.md are checked
+     �?All requirements in specs have corresponding code
+     �?Scenario "Session timeout after inactivity" not tested
 
      CORRECTNESS
-     ✓ Implementation matches spec intent
-     ✓ Edge cases from scenarios are handled
-     ✓ Error states match spec definitions
+     �?Implementation matches spec intent
+     �?Edge cases from scenarios are handled
+     �?Error states match spec definitions
 
      COHERENCE
-     ✓ Design decisions reflected in code structure
-     ✓ Naming conventions consistent with design.md
-     ⚠ Design mentions "event-driven" but implementation uses polling
+     �?Design decisions reflected in code structure
+     �?Naming conventions consistent with design.md
+     �?Design mentions "event-driven" but implementation uses polling
 
      SUMMARY
      ─────────────────────────────
@@ -277,26 +277,26 @@ Verify won't block archive, but it surfaces issues you might want to address fir
 
 #### Archive: Finalize the Change
 
-`/opsx:archive` completes the change and moves it to the archive:
+`/testspec:archive` completes the change and moves it to the archive:
 
 ```text
-You: /opsx:archive
+You: /testspec:archive
 
 AI:  Archiving add-auth...
 
      Artifact status:
-     ✓ proposal.md exists
-     ✓ specs/ exists
-     ✓ design.md exists
-     ✓ tasks.md exists (12/12 tasks complete)
+     �?proposal.md exists
+     �?specs/ exists
+     �?design.md exists
+     �?tasks.md exists (12/12 tasks complete)
 
      Delta specs: Not yet synced to main
-     → Would you like to sync now?
+     �?Would you like to sync now?
 
 You: Yes
 
-AI:  ✓ Synced specs to openspec/specs/auth/spec.md
-     ✓ Moved to openspec/changes/archive/2025-01-24-add-auth/
+AI:  �?Synced specs to TestSpec/specs/auth/spec.md
+     �?Moved to TestSpec/changes/archive/2025-01-24-add-auth/
 
      Change archived successfully.
 ```
@@ -305,17 +305,17 @@ Archive will prompt if specs aren't synced. It won't block on incomplete tasks, 
 
 ## When to Use What
 
-### `/opsx:ff` vs `/opsx:continue`
+### `/testspec:ff` vs `/testspec:continue`
 
 | Situation | Use |
 |-----------|-----|
-| Clear requirements, ready to build | `/opsx:ff` |
-| Exploring, want to review each step | `/opsx:continue` |
-| Want to iterate on proposal before specs | `/opsx:continue` |
-| Time pressure, need to move fast | `/opsx:ff` |
-| Complex change, want control | `/opsx:continue` |
+| Clear requirements, ready to build | `/testspec:ff` |
+| Exploring, want to review each step | `/testspec:continue` |
+| Want to iterate on proposal before specs | `/testspec:continue` |
+| Time pressure, need to move fast | `/testspec:ff` |
+| Complex change, want control | `/testspec:continue` |
 
-**Rule of thumb:** If you can describe the full scope upfront, use `/opsx:ff`. If you're figuring it out as you go, use `/opsx:continue`.
+**Rule of thumb:** If you can describe the full scope upfront, use `/testspec:ff`. If you're figuring it out as you go, use `/testspec:continue`.
 
 ### When to Update vs Start Fresh
 
@@ -336,30 +336,30 @@ A common question: when is updating an existing change okay, and when should you
 - Patches would confuse more than clarify
 
 ```text
-                     ┌─────────────────────────────────────┐
-                     │     Is this the same work?          │
-                     └──────────────┬──────────────────────┘
-                                    │
-                 ┌──────────────────┼──────────────────┐
-                 │                  │                  │
-                 ▼                  ▼                  ▼
+                     ┌─────────────────────────────────────�?
+                     �?    Is this the same work?          �?
+                     └──────────────┬──────────────────────�?
+                                    �?
+                 ┌──────────────────┼──────────────────�?
+                 �?                 �?                 �?
+                 �?                 �?                 �?
           Same intent?      >50% overlap?      Can original
           Same problem?     Same scope?        be "done" without
-                 │                  │          these changes?
-                 │                  │                  │
-       ┌────────┴────────┐  ┌──────┴──────┐   ┌───────┴───────┐
-       │                 │  │             │   │               │
+                 �?                 �?         these changes?
+                 �?                 �?                 �?
+       ┌────────┴────────�? ┌──────┴──────�?  ┌───────┴───────�?
+       �?                �? �?            �?  �?              �?
       YES               NO YES           NO  NO              YES
-       │                 │  │             │   │               │
-       ▼                 ▼  ▼             ▼   ▼               ▼
+       �?                �? �?            �?  �?              �?
+       �?                �? �?            �?  �?              �?
     UPDATE            NEW  UPDATE       NEW  UPDATE          NEW
 ```
 
 **Example: "Add dark mode"**
 
-- "Need to also support custom themes" → New change (scope exploded)
-- "System preference detection is harder than expected" → Update (same intent)
-- "Let's ship toggle first, add preferences later" → Update then archive, then new change
+- "Need to also support custom themes" �?New change (scope exploded)
+- "System preference detection is harder than expected" �?Update (same intent)
+- "Let's ship toggle first, add preferences later" �?Update then archive, then new change
 
 ## Best Practices
 
@@ -373,12 +373,12 @@ One logical unit of work per change. If you're doing "add feature X and also ref
 - Can ship independently
 - Simpler rollback if needed
 
-### Use `/opsx:explore` for Unclear Requirements
+### Use `/testspec:explore` for Unclear Requirements
 
 Before committing to a change, explore the problem space:
 
 ```text
-You: /opsx:explore
+You: /testspec:explore
 
 AI:  What would you like to explore?
 
@@ -399,16 +399,16 @@ Exploration clarifies thinking before you create artifacts.
 
 ### Verify Before Archiving
 
-Use `/opsx:verify` to check implementation matches artifacts:
+Use `/testspec:verify` to check implementation matches artifacts:
 
 ```text
-You: /opsx:verify
+You: /testspec:verify
 
 AI:  Verifying add-dark-mode...
 
-     ✓ All tasks in tasks.md are checked
-     ✓ Requirements in specs have corresponding code
-     ✓ Design decisions are reflected in implementation
+     �?All tasks in tasks.md are checked
+     �?Requirements in specs have corresponding code
+     �?Design decisions are reflected in implementation
 
      Ready to archive!
 ```
@@ -417,7 +417,7 @@ Catches mismatches before you close out the change.
 
 ### Name Changes Clearly
 
-Good names make `openspec list` useful:
+Good names make `TestSpec list` useful:
 
 ```text
 Good:                          Avoid:
@@ -433,16 +433,16 @@ For full command details and options, see [Commands](commands.md).
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/opsx:propose` | Create change + planning artifacts | Fast default path (`core` profile) |
-| `/opsx:explore` | Think through ideas | Unclear requirements, investigation |
-| `/opsx:new` | Start a change scaffold | Expanded mode, explicit artifact control |
-| `/opsx:continue` | Create next artifact | Expanded mode, step-by-step artifact creation |
-| `/opsx:ff` | Create all planning artifacts | Expanded mode, clear scope |
-| `/opsx:apply` | Implement tasks | Ready to write code |
-| `/opsx:verify` | Validate implementation | Expanded mode, before archiving |
-| `/opsx:sync` | Merge delta specs | Expanded mode, optional |
-| `/opsx:archive` | Complete the change | All work finished |
-| `/opsx:bulk-archive` | Archive multiple changes | Expanded mode, parallel work |
+| `/testspec:propose` | Create change + planning artifacts | Fast default path (`core` profile) |
+| `/testspec:explore` | Think through ideas | Unclear requirements, investigation |
+| `/testspec:new` | Start a change scaffold | Expanded mode, explicit artifact control |
+| `/testspec:continue` | Create next artifact | Expanded mode, step-by-step artifact creation |
+| `/testspec:ff` | Create all planning artifacts | Expanded mode, clear scope |
+| `/testspec:apply` | Implement tasks | Ready to write code |
+| `/testspec:verify` | Validate implementation | Expanded mode, before archiving |
+| `/testspec:sync` | Merge delta specs | Expanded mode, optional |
+| `/testspec:archive` | Complete the change | All work finished |
+| `/testspec:bulk-archive` | Archive multiple changes | Expanded mode, parallel work |
 
 ## Next Steps
 

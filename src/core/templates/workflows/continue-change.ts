@@ -8,8 +8,8 @@ import type { SkillTemplate, CommandTemplate } from '../types.js';
 
 export function getContinueChangeSkillTemplate(): SkillTemplate {
   return {
-    name: 'openspec-continue-change',
-    description: 'Continue working on an OpenSpec change by creating the next artifact. Use when the user wants to progress their change, create the next artifact, or continue their workflow.',
+    name: 'testspec-continue-change',
+    description: 'Continue working on an TestSpec change by creating the next artifact. Use when the user wants to progress their change, create the next artifact, or continue their workflow.',
     instructions: `Continue working on a change by creating the next artifact.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
@@ -18,7 +18,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
 
 1. **If no change name provided, prompt for selection**
 
-   Run \`openspec list --json\` to get available changes sorted by most recently modified. Then use the **AskUserQuestion tool** to let the user select which change to work on.
+   Run \`testspec list --json\` to get available changes sorted by most recently modified. Then use the **AskUserQuestion tool** to let the user select which change to work on.
 
    Present the top 3-4 most recently modified changes as options, showing:
    - Change name
@@ -32,7 +32,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
 
 2. **Check current status**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand current state. The response includes:
    - \`schemaName\`: The workflow schema being used (e.g., "spec-driven")
@@ -55,7 +55,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
    - Pick the FIRST artifact with \`status: "ready"\` from the status output
    - Get its instructions:
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     testspec instructions <artifact-id> --change "<name>" --json
      \`\`\`
    - Parse the JSON. The key fields are:
      - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -80,7 +80,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
 
 4. **After creating an artifact, show progress**
    \`\`\`bash
-   openspec status --change "<name>"
+   testspec status --change "<name>"
    \`\`\`
 
 **Output**
@@ -118,26 +118,26 @@ For other schemas, follow the \`instruction\` field from the CLI output.
   - Do NOT copy \`<context>\`, \`<rules>\`, \`<project_context>\` blocks into the artifact
   - These guide what you write, but should never appear in the output`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
-    metadata: { author: 'openspec', version: '1.0' },
+    compatibility: 'Requires testspec CLI.',
+    metadata: { author: 'testspec', version: '1.0' },
   };
 }
 
 export function getOpsxContinueCommandTemplate(): CommandTemplate {
   return {
-    name: 'OPSX: Continue',
+    name: 'TESTSPEC: Continue',
     description: 'Continue working on a change - create the next artifact (Experimental)',
     category: 'Workflow',
     tags: ['workflow', 'artifacts', 'experimental'],
     content: `Continue working on a change by creating the next artifact.
 
-**Input**: Optionally specify a change name after \`/opsx:continue\` (e.g., \`/opsx:continue add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: Optionally specify a change name after \`/testspec:continue\` (e.g., \`/testspec:continue add-auth\`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
 
 1. **If no change name provided, prompt for selection**
 
-   Run \`openspec list --json\` to get available changes sorted by most recently modified. Then use the **AskUserQuestion tool** to let the user select which change to work on.
+   Run \`testspec list --json\` to get available changes sorted by most recently modified. Then use the **AskUserQuestion tool** to let the user select which change to work on.
 
    Present the top 3-4 most recently modified changes as options, showing:
    - Change name
@@ -151,7 +151,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
 
 2. **Check current status**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   testspec status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand current state. The response includes:
    - \`schemaName\`: The workflow schema being used (e.g., "spec-driven")
@@ -165,7 +165,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
    **If all artifacts are complete (\`isComplete: true\`)**:
    - Congratulate the user
    - Show final status including the schema used
-   - Suggest: "All artifacts created! You can now implement this change with \`/opsx:apply\` or archive it with \`/opsx:archive\`."
+   - Suggest: "All artifacts created! You can now implement this change with \`/testspec:apply\` or archive it with \`/testspec:archive\`."
    - STOP
 
    ---
@@ -174,7 +174,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
    - Pick the FIRST artifact with \`status: "ready"\` from the status output
    - Get its instructions:
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     testspec instructions <artifact-id> --change "<name>" --json
      \`\`\`
    - Parse the JSON. The key fields are:
      - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -199,7 +199,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
 
 4. **After creating an artifact, show progress**
    \`\`\`bash
-   openspec status --change "<name>"
+   testspec status --change "<name>"
    \`\`\`
 
 **Output**
@@ -209,7 +209,7 @@ After each invocation, show:
 - Schema workflow being used
 - Current progress (N/M complete)
 - What artifacts are now unlocked
-- Prompt: "Run \`/opsx:continue\` to create the next artifact"
+- Prompt: "Run \`/testspec:continue\` to create the next artifact"
 
 **Artifact Creation Guidelines**
 

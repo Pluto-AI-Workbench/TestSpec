@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.repository == 'Fission-AI/OpenSpec'
+    if: github.repository == 'Pluto-AI-Workbench/TestSpec'
     runs-on: ubuntu-latest
     steps:
       # Generate GitHub App token first - used for checkout and changesets
@@ -45,7 +45,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Opens/updates the Version Packages PR; publishes when the Version PR merges
+      # TestSpec updates the Version Packages PR; publishes when the Version PR merges
       - name: Create/Update Version PR
         id: changesets
         uses: changesets/action@v1

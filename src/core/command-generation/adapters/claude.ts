@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Claude Code Command Adapter
  *
  * Formats commands for Claude Code following its frontmatter specification.
@@ -54,3 +54,4 @@ ${content.body}
 `;
   },
 };
+

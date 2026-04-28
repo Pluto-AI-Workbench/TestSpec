@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Lingma Command Adapter
  *
  * Formats commands for Lingma following its frontmatter specification.
@@ -32,3 +32,4 @@ ${content.body}
 `;
   },
 };
+
