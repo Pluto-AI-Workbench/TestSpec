@@ -18,3 +18,7 @@ export { getVerifyChangeSkillTemplate, getOpsxVerifyCommandTemplate } from './wo
 export { getOnboardSkillTemplate, getOpsxOnboardCommandTemplate } from './workflows/onboard.js';
 export { getOpsxProposeSkillTemplate, getOpsxProposeCommandTemplate } from './workflows/propose.js';
 export { getFeedbackSkillTemplate } from './workflows/feedback.js';
+export { getSdtNewSkillTemplate, getOpsxSdtNewCommandTemplate } from './workflows/sdt-new.js';
+export { getSdtBuildSkillTemplate, getOpsxSdtBuildCommandTemplate } from './workflows/sdt-build.js';
+export { getSdtDesignSkillTemplate, getOpsxSdtDesignCommandTemplate } from './workflows/sdt-design.js';
+export { getSdtClarifySkillTemplate, getOpsxSdtClarifyCommandTemplate } from './workflows/sdt-clarify.js';

@@ -72,6 +72,10 @@ const WORKFLOW_TO_SKILL_DIR: Record<string, string> = {
   'verify': 'testspec-verify-change',
   'onboard': 'testspec-onboard',
   'propose': 'testspec-propose',
+  'sdt-new': 'testspec-sdt-new',
+  'sdt-build': 'testspec-sdt-build',
+  'sdt-design': 'testspec-sdt-design',
+  'sdt-clarify': 'testspec-sdt-clarify',
 };
 
 // -----------------------------------------------------------------------------

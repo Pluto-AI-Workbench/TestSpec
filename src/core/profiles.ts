@@ -28,6 +28,10 @@ export const ALL_WORKFLOWS = [
   'bulk-archive',
   'verify',
   'onboard',
+  'sdt-new',
+  'sdt-build',
+  'sdt-design',
+  'sdt-clarify',
 ] as const;
 
 export type WorkflowId = (typeof ALL_WORKFLOWS)[number];
@@ -44,7 +48,7 @@ export function getProfileWorkflows(
   customWorkflows?: string[]
 ): readonly string[] {
   if (profile === 'custom') {
-    return customWorkflows ?? [];
+    return customWorkflows ?? ALL_WORKFLOWS;
   }
   return CORE_WORKFLOWS;
 }

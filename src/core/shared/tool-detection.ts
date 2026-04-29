@@ -23,6 +23,10 @@ export const SKILL_NAMES = [
   'testspec-verify-change',
   'testspec-onboard',
   'testspec-propose',
+  'testspec-sdt-new',
+  'testspec-sdt-build',
+  'testspec-sdt-design',
+  'testspec-sdt-clarify',
 ] as const;
 
 export type SkillName = (typeof SKILL_NAMES)[number];
@@ -42,6 +46,10 @@ export const COMMAND_IDS = [
   'verify',
   'onboard',
   'propose',
+  'sdt-new',
+  'sdt-build',
+  'sdt-design',
+  'sdt-clarify',
 ] as const;
 
 export type CommandId = (typeof COMMAND_IDS)[number];

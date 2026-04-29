@@ -16,6 +16,10 @@ import {
   getVerifyChangeSkillTemplate,
   getOnboardSkillTemplate,
   getOpsxProposeSkillTemplate,
+  getSdtNewSkillTemplate,
+  getSdtBuildSkillTemplate,
+  getSdtDesignSkillTemplate,
+  getSdtClarifySkillTemplate,
   getOpsxExploreCommandTemplate,
   getOpsxNewCommandTemplate,
   getOpsxContinueCommandTemplate,
@@ -27,6 +31,10 @@ import {
   getOpsxVerifyCommandTemplate,
   getOpsxOnboardCommandTemplate,
   getOpsxProposeCommandTemplate,
+  getOpsxSdtNewCommandTemplate,
+  getOpsxSdtBuildCommandTemplate,
+  getOpsxSdtDesignCommandTemplate,
+  getOpsxSdtClarifyCommandTemplate,
   type SkillTemplate,
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
@@ -66,6 +74,10 @@ export function getSkillTemplates(workflowFilter?: readonly string[]): SkillTemp
     { template: getVerifyChangeSkillTemplate(), dirName: 'testspec-verify-change', workflowId: 'verify' },
     { template: getOnboardSkillTemplate(), dirName: 'testspec-onboard', workflowId: 'onboard' },
     { template: getOpsxProposeSkillTemplate(), dirName: 'testspec-propose', workflowId: 'propose' },
+    { template: getSdtNewSkillTemplate(), dirName: 'testspec-sdt-new', workflowId: 'sdt-new' },
+    { template: getSdtBuildSkillTemplate(), dirName: 'testspec-sdt-build', workflowId: 'sdt-build' },
+    { template: getSdtDesignSkillTemplate(), dirName: 'testspec-sdt-design', workflowId: 'sdt-design' },
+    { template: getSdtClarifySkillTemplate(), dirName: 'testspec-sdt-clarify', workflowId: 'sdt-clarify' },
   ];
 
   if (!workflowFilter) return all;
@@ -92,6 +104,10 @@ export function getCommandTemplates(workflowFilter?: readonly string[]): Command
     { template: getOpsxVerifyCommandTemplate(), id: 'verify' },
     { template: getOpsxOnboardCommandTemplate(), id: 'onboard' },
     { template: getOpsxProposeCommandTemplate(), id: 'propose' },
+    { template: getOpsxSdtNewCommandTemplate(), id: 'sdt-new' },
+    { template: getOpsxSdtBuildCommandTemplate(), id: 'sdt-build' },
+    { template: getOpsxSdtDesignCommandTemplate(), id: 'sdt-design' },
+    { template: getOpsxSdtClarifyCommandTemplate(), id: 'sdt-clarify' },
   ];
 
   if (!workflowFilter) return all;

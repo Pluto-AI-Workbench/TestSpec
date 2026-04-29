@@ -1,4 +1,8 @@
-﻿## Requirements
+## Purpose
+
+Rebrand the project from "OpenSpec" to "TestSpec", updating all package names, CLI binary, slash commands, and text references across the codebase.
+
+## Requirements
 
 ### Requirement: Package identity updated
 The system SHALL use `@LT86.01/testspec` as the NPM package name in package.json and package-lock.json.
