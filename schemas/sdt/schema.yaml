@@ -1,0 +1,304 @@
+name: sdt
+version: 1
+description: 规范驱动测试工作流 - 基于 pytest 的测试生命周期管理
+
+artifacts:
+  - id: clarify-sdt-requirements
+    generates: "test-requirements.md"
+    description: 测试需求文档，偏向人阅读的风格
+    template: test-requirements-template.md
+    instruction: |
+      澄清测试需求，生成测试需求文档。
+
+      此文档用于记录和澄清待测系统的测试需求，包括：
+      - **背景与目标**：说明测试的背景、目的和范围
+      - **测试范围**：明确需要测试的功能模块和边界
+      - **非测试范围**：明确哪些内容不在本次测试范围内
+      - **测试假设**：列出测试的假设条件
+      - **测试数据要求**：说明测试所需的数据和环境要求
+      - **参考文档**：列出相关的需求文档、设计文档等
+
+      文档风格偏向人类可读，以清晰的段落和列表形式呈现，
+      便于与利益相关者进行需求确认和评审。
+    requires: []
+
+  - id: clarify-sdt-spec
+    generates: "sdt-spec.md"
+    description: 规范驱动测试的契约文件，是测试设计、手工案例、自动化案例的唯一依据
+    template: sdt-spec-template.md
+    instruction: |
+      创建 SDT 规范文档，这是整个规范驱动测试流程的核心契约文件。
+
+      **重要性**：此文档是后续所有测试活动的唯一依据：
+      - 测试点设计（design-test-points）
+      - 手工测试案例设计（design-manual-case）
+      - 自动化测试脚本开发（build-scripts）
+
+      **文档结构**：
+      - **功能概述**：简要描述被测系统的功能
+      - **接口规范**：详细定义所有接口的输入、输出、约束条件
+      - **数据规范**：定义测试所需的数据结构和数据字典
+      - **业务规则**：详细描述各项业务规则和计算逻辑
+      - **边界条件**：明确各种边界值和异常情况
+      - **测试策略**：说明测试的方法和重点
+
+      **格式要求**：
+      - 使用 Markdown 格式，结构清晰
+      - 接口定义需包含：端点、请求方法、参数说明、响应格式
+      - 业务规则需明确前置条件、后置条件和计算公式
+      - 边界条件需列出所有边界值及其组合
+
+      **关键原则**：
+      - 此文档必须完全遵从用户原始需求
+      - 任何需求变更都必须同步更新此文档
+      - 所有后续测试活动都必须以此文档为准
+    requires:
+      - clarify-sdt-requirements
+
+  - id: clarify-risk-assessment
+    generates: "risk-assessment.md"
+    description: 测试风险评估文档，识别测试过程中的风险、假设和约束
+    template: risk-assessment-template.md
+    instruction: |
+      创建测试风险评估文档，识别和分析测试过程中的风险、假设和约束。
+
+      **文档目的**：
+      - 提前识别测试风险，制定应对策略
+      - 明确测试假设条件，确保测试可行性
+      - 记录项目约束，确保测试范围合理
+
+      **文档结构**：
+      - **测试假设**：列出测试的前提条件
+      - **已知风险**：识别已知的风险项及其影响
+      - **风险应对**：针对每个风险的缓解措施
+      - **项目约束**：时间、资源、环境等约束
+      - **依赖关系**：外部依赖和内部依赖
+
+      **此文档特点**：
+      - 对前面的 clarify 阶段工件没有依赖
+      - 对后面的 design/build 阶段不产生强制影响
+      - 作为参考信息辅助决策
+    requires: 
+      - clarify-sdt-spec
+
+  - id: design-test-points
+    generates: "test-points.md"
+    description: 基于 sdt-spec 生成的测试要点文档
+    template: test-points-template.md
+    instruction: |
+      基于 sdt-spec 规范文档，设计和生成测试要点。
+
+      **测试要点格式**：
+      - **功能点编号**：唯一标识每个测试要点（如 TP-001）
+      - **功能点描述**：简洁描述要测试的功能点
+      - **对应需求**：关联到 sdt-spec 中的具体需求条目
+      - **测试类型**：功能测试、边界测试、异常测试、性能测试等
+      - **测试方法**：说明如何进行测试
+      - **优先级**：高/中/低
+
+      **设计原则**：
+      - 测试要点必须完整覆盖 sdt-spec 中的所有需求
+      - 每个测试要点应该可以独立执行
+      - 边界条件和异常情况必须有对应的测试要点
+      - 同类型的测试要点可以归类分组
+
+      **输出示例**：
+      ```
+      ### TP-001: 用户登录功能
+      - **描述**：验证用户可以使用用户名密码登录系统
+      - **对应需求**：sdt-spec.md - 3.1 用户认证
+      - **测试类型**：功能测试
+      - **优先级**：高
+      ```
+    requires:
+      - clarify-sdt-spec
+
+  - id: design-manual-case
+    generates: "manual-cases.json"
+    description: 依据 sdt-spec 和 test-points 生成的手工测试案例
+    template: manual-cases-template.json
+    instruction: |
+      依据 sdt-spec 规范和 test-points 测试要点，生成手工测试案例。
+
+      **JSON 格式要求**：
+      ```json
+      {
+        "test_suite": "测试套件名称",
+        "version": "版本号",
+        "test_cases": [
+          {
+            "case_id": "TC-001",
+            "case_name": "测试案例名称",
+            "case_level": "P0/P1/P2",
+            "functional_description": "功能描述",
+            "preconditions": [
+              "前置条件步骤1",
+              "前置条件步骤2"
+            ],
+            "test_steps": [
+              {
+                "step": 1,
+                "action": "操作描述",
+                "expected_result": "预期结果"
+              },
+              {
+                "step": 2,
+                "action": "操作描述",
+                "expected_result": "预期结果"
+              }
+            ],
+            "test_data": {
+              "key": "value"
+            },
+            "priority": "高/中/低",
+            "linked_tp": ["TP-001"],
+            "tags": ["tag1", "tag2"]
+          }
+        ]
+      }
+      ```
+
+      **字段说明**：
+      - **case_id**：测试案例唯一标识，格式 TC-XXX
+      - **case_name**：测试案例名称，简洁明了
+      - **case_level**：测试等级，P0=核心功能，P1=重要功能，P2=一般功能
+      - **functional_description**：详细的功能描述，说明此案例测试的业务逻辑
+      - **preconditions**：进入该测试场景的前置条件，即需要提前完成的操作步骤
+      - **test_steps**：操作步骤，每步包含操作描述和预期结果
+      - **test_data**：测试所需的数据
+      - **priority**：执行优先级
+      - **linked_tp**：关联的测试要点
+      - **tags**：标签，用于分类和筛选
+
+      **设计原则**：
+      - 每个测试案例应该可以独立执行
+      - 操作步骤应该清晰、可重复执行
+      - 预期结果必须明确、可验证
+      - 测试数据必须具体，避免模糊描述
+    requires:
+      - clarify-sdt-spec
+      - design-test-points
+
+  - id: build-scripts
+    generates: "test_scripts/**/*.py"
+    description: 依据 manual-cases 生成的自动化测试脚本，符合 pytest 框架规范
+    template: test_script_template.py
+    instruction: |
+      依据手工测试案例（manual-cases.json），生成符合 pytest 框架的自动化测试脚本。
+
+      **pytest 规范要求**：
+
+      1. **文件结构**：
+         ```
+         test_scripts/
+         ├── conftest.py          # pytest 配置文件
+         ├── test_suite_*.py      # 测试套件文件
+         └── utils/
+             └── helpers.py       # 辅助工具函数
+         ```
+
+      2. **测试脚本格式**：
+      ```python
+      import pytest
+      from typing import List, Dict, Any
+
+      class TestSuiteName:
+          """测试套件类，对应一个功能模块"""
+
+          @pytest.mark.parametrize("test_data", [
+              {"input": "value1", "expected": "result1"},
+              {"input": "value2", "expected": "result2"},
+          ])
+          def test_case_name(self, test_data, base_url, session):
+              """
+              测试案例名称
+
+              关联手工案例：TC-XXX
+              功能描述：...
+              """
+              # Arrange - 准备测试数据
+              payload = test_data
+
+              # Act - 执行测试操作
+              response = session.post(f"{base_url}/api/endpoint", json=payload)
+
+              # Assert - 验证结果
+              assert response.status_code == 200
+              assert response.json()["result"] == test_data["expected"]
+      ```
+
+      3. **conftest.py 必须包含**：
+      ```python
+      import pytest
+      import os
+      from typing import Generator
+
+      @pytest.fixture(scope="session")
+      def base_url() -> str:
+          """获取测试环境基础 URL"""
+          return os.getenv("TEST_BASE_URL", "http://localhost:8000")
+
+      @pytest.fixture(scope="session")
+      def session():
+          """创建测试会话"""
+          # 返回一个可复用的会话对象
+          pass
+
+      @pytest.fixture
+      def test_data_provider():
+          """从 manual-cases.json 加载测试数据"""
+          pass
+      ```
+
+      4. **命名规范**：
+         - 测试文件：`test_<功能模块>.py`
+         - 测试类：`Test<功能模块名称>`
+         - 测试函数：`test_<测试案例名称>`
+         - Fixture：`fixture_<fixture名称>`
+
+      5. **注释要求**：
+         - 每个测试类必须包含 docstring 说明功能
+         - 每个测试方法必须包含 docstring 说明关联的手工案例和功能描述
+         - 复杂逻辑需要行内注释说明
+
+      6. **断言规范**：
+         - 使用有意义的断言消息
+         - 预期值在前，实际值在后
+         - 复杂断言可以提取为辅助函数
+
+      **生成的测试脚本必须**：
+      - 可以通过 `pytest` 命令直接运行
+      - 支持 `pytest --tb=short` 查看详细错误信息
+      - 支持 `pytest -v` 查看详细测试进度
+      - 支持 `pytest -k <pattern>` 按名称筛选执行
+    requires:
+      - clarify-sdt-spec
+      - design-manual-case
+
+apply:
+  requires: [build-scripts]
+  instruction: |
+    运行自动化测试案例并生成测试报告。
+
+    **执行步骤**：
+    1. 读取手工测试案例 manual-cases.json 了解测试范围
+    2. 读取生成的 pytest 测试脚本
+    3. 配置测试环境（base_url、session 等）
+    4. 运行 pytest 执行测试
+
+    **pytest 运行命令**：
+    ```bash
+    pytest test_scripts/ -v --tb=short --junit-xml=reports/report.xml --html=reports/report.html
+    ```
+
+    **输出产物**：
+    - `reports/report.xml` - JUnit 格式测试报告（可供 CI/CD 集成）
+    - `reports/report.html` - HTML 格式测试报告（人类可读）
+    - `reports/test-results.json` - 测试结果 JSON（包含通过/失败详情）
+
+    **报告内容要求**：
+    - 测试套件执行统计（总数、通过数、失败数、跳过数）
+    - 每个测试案例的执行结果
+    - 失败案例的错误信息和堆栈
+    - 测试执行时长
+    - 关联的手工案例 ID 和测试要点
