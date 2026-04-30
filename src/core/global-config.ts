@@ -8,7 +8,8 @@ export const GLOBAL_CONFIG_FILE_NAME = 'config.json';
 export const GLOBAL_DATA_DIR_NAME = 'testspec';
 
 // TypeScript types
-export type Profile = 'core' | 'custom';
+// Extended set of profile options. "sdt" is the new default/profile for SDT workflows.
+export type Profile = 'core' | 'custom' | 'sdt';
 export type Delivery = 'both' | 'skills' | 'commands';
 
 // TypeScript interfaces
@@ -21,7 +22,7 @@ export interface GlobalConfig {
 
 const DEFAULT_CONFIG: GlobalConfig = {
   featureFlags: {},
-  profile: 'core',
+  profile: 'sdt',
   delivery: 'both',
 };
 

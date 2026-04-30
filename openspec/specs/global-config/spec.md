@@ -84,6 +84,26 @@ The system SHALL provide a default configuration that is used when no config fil
 - **WHEN** no config file exists
 - **THEN** the default configuration includes an empty `featureFlags` object
 
+### Requirement: Profile Configuration
+
+The system SHALL support a `profile` field in global config that controls which workflows are active. Supported profiles are `core`, `custom`, and `sdt`.
+
+#### Scenario: Default profile
+- **WHEN** no profile is set in config file
+- **THEN** the system uses `sdt` as the default profile
+
+#### Scenario: SDT profile workflows
+- **WHEN** profile is set to `sdt`
+- **THEN** the system activates SDT workflows: `sdt-new`, `sdt-build`, `sdt-design`, `sdt-clarify`
+
+#### Scenario: Core profile workflows
+- **WHEN** profile is set to `core`
+- **THEN** the system activates core workflows: `propose`, `explore`, `apply`, `archive`
+
+#### Scenario: Custom profile workflows
+- **WHEN** profile is set to `custom`
+- **THEN** the system uses the `workflows` array from config to determine active workflows
+
 ### Requirement: Config Schema Evolution
 
 The system SHALL merge loaded configuration with default values to ensure new config fields are available even when loading older config files.

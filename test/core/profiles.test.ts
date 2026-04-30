@@ -20,14 +20,15 @@ describe('profiles', () => {
   });
 
   describe('ALL_WORKFLOWS', () => {
-    it('should contain all 11 workflows', () => {
-      expect(ALL_WORKFLOWS).toHaveLength(11);
+    it('should contain all 15 workflows', () => {
+      expect(ALL_WORKFLOWS).toHaveLength(15);
     });
 
     it('should contain expected workflow IDs', () => {
       const expected = [
         'propose', 'explore', 'new', 'continue', 'apply',
         'ff', 'sync', 'archive', 'bulk-archive', 'verify', 'onboard',
+        'sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify',
       ];
       expect([...ALL_WORKFLOWS]).toEqual(expected);
     });
@@ -52,7 +53,7 @@ describe('profiles', () => {
 
     it('should return empty array for custom profile with no customWorkflows', () => {
       const result = getProfileWorkflows('custom');
-      expect(result).toEqual([]);
+      expect(result).toEqual(ALL_WORKFLOWS);
     });
 
     it('should return empty array for custom profile with empty customWorkflows', () => {

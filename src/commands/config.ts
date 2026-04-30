@@ -19,7 +19,7 @@ import {
   validateConfig,
   DEFAULT_CONFIG,
 } from '../core/config-schema.js';
-import { CORE_WORKFLOWS, ALL_WORKFLOWS, getProfileWorkflows } from '../core/profiles.js';
+import { CORE_WORKFLOWS, SDT_WORKFLOWS, ALL_WORKFLOWS, getProfileWorkflows } from '../core/profiles.js';
 import { TESTSPEC_DIR_NAME } from '../core/config.js';
 import { hasProjectConfigDrift } from '../core/profile-sync-drift.js';
 
@@ -114,7 +114,14 @@ export function deriveProfileFromWorkflowSelection(selectedWorkflows: string[]):
   const isCoreMatch =
     selectedWorkflows.length === CORE_WORKFLOWS.length &&
     CORE_WORKFLOWS.every((w) => selectedWorkflows.includes(w));
-  return isCoreMatch ? 'core' : 'custom';
+  if (isCoreMatch) return 'core';
+
+  const isSdtMatch =
+    selectedWorkflows.length === SDT_WORKFLOWS.length &&
+    SDT_WORKFLOWS.every((w) => selectedWorkflows.includes(w));
+  if (isSdtMatch) return 'sdt';
+
+  return 'custom';
 }
 
 /**
@@ -454,7 +461,7 @@ export function registerConfigCommand(program: Command): void {
     .command('profile [preset]')
     .description('Configure workflow profile (interactive picker or preset shortcut)')
     .action(async (preset?: string) => {
-      // Preset shortcut: `testspec config profile core`
+      // Preset shortcut: `testspec config profile core` or `testspec config profile sdt`
       if (preset === 'core') {
         const config = getGlobalConfig();
         config.profile = 'core';
@@ -465,8 +472,18 @@ export function registerConfigCommand(program: Command): void {
         return;
       }
 
+      if (preset === 'sdt') {
+        const config = getGlobalConfig();
+        config.profile = 'sdt';
+        config.workflows = [...SDT_WORKFLOWS];
+        // Preserve delivery setting
+        saveGlobalConfig(config);
+        console.log('Config updated. Run `testspec update` in your projects to apply.');
+        return;
+      }
+
       if (preset) {
-        console.error(`Error: Unknown profile preset "${preset}". Available presets: core`);
+        console.error(`Error: Unknown profile preset "${preset}". Available presets: core, sdt`);
         process.exitCode = 1;
         return;
       }

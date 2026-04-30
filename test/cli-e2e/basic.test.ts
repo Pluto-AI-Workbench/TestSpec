@@ -131,14 +131,14 @@ describe('testspec CLI e2e basics', () => {
       await fs.mkdir(emptyProjectDir, { recursive: true });
 
       const codexHome = path.join(emptyProjectDir, '.codex');
-      const result = await runCLI(['init', '--tools', 'all'], {
+      const result = await runCLI(['init', '--tools', 'all', '--profile', 'core'], {
         cwd: emptyProjectDir,
         env: { CODEX_HOME: codexHome },
       });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('TestSpec Setup Complete');
 
-      // Check that skills were created for multiple tools
+      // Check that skills were created for multiple tools (core profile)
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/testspec-explore/SKILL.md');
       const cursorSkillPath = path.join(emptyProjectDir, '.cursor/skills/testspec-explore/SKILL.md');
       expect(await fileExists(claudeSkillPath)).toBe(true);
@@ -150,12 +150,12 @@ describe('testspec CLI e2e basics', () => {
       const emptyProjectDir = path.join(projectDir, '..', 'empty-project');
       await fs.mkdir(emptyProjectDir, { recursive: true });
 
-      const result = await runCLI(['init', '--tools', 'claude'], { cwd: emptyProjectDir });
+      const result = await runCLI(['init', '--tools', 'claude', '--profile', 'core'], { cwd: emptyProjectDir });
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('TestSpec Setup Complete');
       expect(result.stdout).toContain('Claude Code');
 
-      // New init creates skills, not CLAUDE.md
+      // With --profile core, skills for core workflows should be created
       const claudeSkillPath = path.join(emptyProjectDir, '.claude/skills/testspec-explore/SKILL.md');
       const cursorSkillPath = path.join(emptyProjectDir, '.cursor/skills/testspec-explore/SKILL.md');
       expect(await fileExists(claudeSkillPath)).toBe(true);

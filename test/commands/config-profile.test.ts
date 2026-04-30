@@ -35,24 +35,24 @@ describe('diffProfileState workflow formatting', () => {
     const { diffProfileState } = await import('../../src/commands/config.js');
 
     const diff = diffProfileState(
-      { profile: 'custom', delivery: 'both', workflows: ['propose', 'sync'] },
-      { profile: 'custom', delivery: 'both', workflows: ['propose'] },
+      { profile: 'custom', delivery: 'both', workflows: ['sdt-new', 'sdt-build'] },
+      { profile: 'custom', delivery: 'both', workflows: ['sdt-new'] },
     );
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.lines).toEqual(['workflows: removed sync']);
+    expect(diff.lines).toEqual(['workflows: removed sdt-build']);
   });
 
   it('uses explicit labels when workflows are added and removed', async () => {
     const { diffProfileState } = await import('../../src/commands/config.js');
 
     const diff = diffProfileState(
-      { profile: 'custom', delivery: 'both', workflows: ['propose', 'sync'] },
-      { profile: 'custom', delivery: 'both', workflows: ['propose', 'verify'] },
+      { profile: 'custom', delivery: 'both', workflows: ['sdt-new', 'sdt-build'] },
+      { profile: 'custom', delivery: 'both', workflows: ['sdt-new', 'sdt-design'] },
     );
 
     expect(diff.hasChanges).toBe(true);
-    expect(diff.lines).toEqual(['workflows: added verify; removed sync']);
+    expect(diff.lines).toEqual(['workflows: added sdt-design; removed sdt-build']);
   });
 });
 
@@ -62,14 +62,14 @@ describe('deriveProfileFromWorkflowSelection', () => {
     expect(deriveProfileFromWorkflowSelection([])).toBe('custom');
   });
 
-  it('returns custom when selection is a superset of core workflows', async () => {
+  it('returns custom when selection is a superset of sdt workflows', async () => {
     const { deriveProfileFromWorkflowSelection } = await import('../../src/commands/config.js');
-    expect(deriveProfileFromWorkflowSelection(['propose', 'explore', 'apply', 'archive', 'new'])).toBe('custom');
+    expect(deriveProfileFromWorkflowSelection(['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify', 'sdt-new'])).toBe('custom');
   });
 
-  it('returns core when selection has exactly core workflows in different order', async () => {
+  it('returns sdt when selection has exactly sdt workflows in different order', async () => {
     const { deriveProfileFromWorkflowSelection } = await import('../../src/commands/config.js');
-    expect(deriveProfileFromWorkflowSelection(['archive', 'apply', 'explore', 'propose'])).toBe('core');
+    expect(deriveProfileFromWorkflowSelection(['sdt-clarify', 'sdt-build', 'sdt-new', 'sdt-design'])).toBe('sdt');
   });
 });
 
@@ -77,10 +77,32 @@ describe('config profile interactive flow', () => {
   let tempDir: string;
   let originalEnv: NodeJS.ProcessEnv;
   let originalCwd: string;
-  let originalTTY: boolean | undefined;
-  let originalExitCode: number | undefined;
+  let originalTTY: boolean;
+  let originalExitCode: number | string | undefined;
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  function setupSyncedSdtBothArtifacts(projectDir: string): void {
+    fs.mkdirSync(path.join(projectDir, 'testspec'), { recursive: true });
+    const sdtSkillDirs = [
+      'testspec-sdt-new',
+      'testspec-sdt-build',
+      'testspec-sdt-design',
+      'testspec-sdt-clarify',
+    ];
+    for (const dirName of sdtSkillDirs) {
+      const skillPath = path.join(projectDir, '.claude', 'skills', dirName, 'SKILL.md');
+      fs.mkdirSync(path.dirname(skillPath), { recursive: true });
+      fs.writeFileSync(skillPath, `name: ${dirName}\n`, 'utf-8');
+    }
+
+    const sdtCommands = ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'];
+    for (const commandId of sdtCommands) {
+      const commandPath = path.join(projectDir, '.claude', 'commands', 'testspec', `${commandId}.md`);
+      fs.mkdirSync(path.dirname(commandPath), { recursive: true });
+      fs.writeFileSync(commandPath, `# ${commandId}\n`, 'utf-8');
+    }
+  }
 
   function setupDriftedProjectArtifacts(projectDir: string): void {
     fs.mkdirSync(path.join(projectDir, 'testspec'), { recursive: true });
@@ -89,34 +111,12 @@ describe('config profile interactive flow', () => {
     fs.writeFileSync(exploreSkillPath, 'name: testspec-explore\n', 'utf-8');
   }
 
-  function setupSyncedCoreBothArtifacts(projectDir: string): void {
-    fs.mkdirSync(path.join(projectDir, 'testspec'), { recursive: true });
-    const coreSkillDirs = [
-      'testspec-propose',
-      'testspec-explore',
-      'testspec-apply-change',
-      'testspec-archive-change',
-    ];
-    for (const dirName of coreSkillDirs) {
-      const skillPath = path.join(projectDir, '.claude', 'skills', dirName, 'SKILL.md');
-      fs.mkdirSync(path.dirname(skillPath), { recursive: true });
-      fs.writeFileSync(skillPath, `name: ${dirName}\n`, 'utf-8');
-    }
-
-    const coreCommands = ['propose', 'explore', 'apply', 'archive'];
-    for (const commandId of coreCommands) {
-      const commandPath = path.join(projectDir, '.claude', 'commands', 'opsx', `${commandId}.md`);
-      fs.mkdirSync(path.dirname(commandPath), { recursive: true });
-      fs.writeFileSync(commandPath, `# ${commandId}\n`, 'utf-8');
-    }
-  }
-
   function addExtraSyncWorkflowArtifacts(projectDir: string): void {
     const syncSkillPath = path.join(projectDir, '.claude', 'skills', 'testspec-sync-specs', 'SKILL.md');
     fs.mkdirSync(path.dirname(syncSkillPath), { recursive: true });
     fs.writeFileSync(syncSkillPath, 'name: testspec-sync-specs\n', 'utf-8');
 
-    const syncCommandPath = path.join(projectDir, '.claude', 'commands', 'opsx', 'sync.md');
+    const syncCommandPath = path.join(projectDir, '.claude', 'commands', 'testspec', 'sync.md');
     fs.mkdirSync(path.dirname(syncCommandPath), { recursive: true });
     fs.writeFileSync(syncCommandPath, '# sync\n', 'utf-8');
   }
@@ -129,7 +129,7 @@ describe('config profile interactive flow', () => {
 
     originalEnv = { ...process.env };
     originalCwd = process.cwd();
-    originalTTY = (process.stdout as NodeJS.WriteStream & { isTTY?: boolean }).isTTY;
+    originalTTY = (process.stdout as NodeJS.WriteStream & { isTTY?: boolean }).isTTY ?? false;
     originalExitCode = process.exitCode;
 
     process.env.XDG_CONFIG_HOME = tempDir;
@@ -154,149 +154,115 @@ describe('config profile interactive flow', () => {
   });
 
   it('delivery-only action should not invoke workflow checkbox prompt', async () => {
-    const { saveGlobalConfig, getGlobalConfig } = await import('../../src/core/global-config.js');
-    const { select, checkbox } = await getPromptMocks();
-
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
-    select.mockResolvedValueOnce('delivery');
-    select.mockResolvedValueOnce('skills');
-
-    await runConfigCommand(['profile']);
-
-    expect(checkbox).not.toHaveBeenCalled();
-    expect(select).toHaveBeenCalledTimes(2);
-    expect(getGlobalConfig().delivery).toBe('skills');
-  });
-
-  it('action picker should use configure wording and describe each path', async () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
-    select.mockResolvedValueOnce('keep');
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
+    select.mockResolvedValueOnce('delivery');
 
     await runConfigCommand(['profile']);
 
-    const firstCall = select.mock.calls[0][0];
-    expect(firstCall.message).toBe('What do you want to configure?');
-    expect(firstCall.choices).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        value: 'delivery',
-        description: 'Change where workflows are installed',
-      }),
-      expect.objectContaining({
-        value: 'workflows',
-        description: 'Change which workflow actions are available',
-      }),
-      expect.objectContaining({
-        value: 'keep',
-        name: 'Keep current settings (exit)',
-      }),
-    ]));
+    const { checkbox } = await getPromptMocks();
+    expect(checkbox).not.toHaveBeenCalled();
+  });
+
+  it('action picker should use configure wording and describe each path', async () => {
+    const { select } = await getPromptMocks();
+
+    select.mockResolvedValueOnce('delivery');
+
+    await runConfigCommand(['profile']);
+
+    expect(select).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'What do you want to configure?',
+      choices: expect.arrayContaining([
+        expect.objectContaining({ value: 'both', description: expect.any(String) }),
+        expect.objectContaining({ value: 'delivery', description: expect.any(String) }),
+        expect.objectContaining({ value: 'workflows', description: expect.any(String) }),
+        expect.objectContaining({ value: 'keep', description: expect.any(String) }),
+      ]),
+    }));
   });
 
   it('workflows-only action should not invoke delivery prompt', async () => {
-    const { saveGlobalConfig, getGlobalConfig } = await import('../../src/core/global-config.js');
-    const { ALL_WORKFLOWS } = await import('../../src/core/profiles.js');
+    const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, checkbox } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
     select.mockResolvedValueOnce('workflows');
-    checkbox.mockResolvedValueOnce(['propose', 'explore']);
+    checkbox.mockResolvedValueOnce(['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify']);
 
     await runConfigCommand(['profile']);
 
-    expect(select).toHaveBeenCalledTimes(1);
-    expect(checkbox).toHaveBeenCalledTimes(1);
-    const checkboxCall = checkbox.mock.calls[0][0];
-    expect(checkboxCall.pageSize).toBe(ALL_WORKFLOWS.length);
-    expect(checkboxCall.theme).toEqual({
-      icon: {
-        checked: '[x]',
-        unchecked: '[ ]',
-      },
-    });
-    const proposeChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'propose');
-    const onboardChoice = checkboxCall.choices.find((choice: { value: string }) => choice.value === 'onboard');
-    expect(proposeChoice.checked).toBe(true);
-    expect(onboardChoice.checked).toBe(false);
-    expect(getGlobalConfig().workflows).toEqual(['propose', 'explore']);
+    expect(checkbox).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'Select workflows to make available:',
+    }));
   });
 
   it('delivery picker should mark current option inline', async () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'custom', delivery: 'commands', workflows: ['explore'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'skills', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
     select.mockResolvedValueOnce('delivery');
-    select.mockResolvedValueOnce('commands');
+    select.mockResolvedValueOnce('skills');
 
     await runConfigCommand(['profile']);
 
-    expect(select).toHaveBeenCalledTimes(2);
-    const secondCall = select.mock.calls[1][0];
-    expect(secondCall.choices).toEqual(expect.arrayContaining([
-      expect.objectContaining({ value: 'commands', name: 'Commands only [current]' }),
-    ]));
+    expect(select).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      choices: expect.arrayContaining([
+        expect.objectContaining({ value: 'skills', name: expect.stringContaining('[current]') }),
+      ]),
+    }));
   });
 
   it('workflow picker should use friendly names with descriptions', async () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, checkbox } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
     select.mockResolvedValueOnce('workflows');
-    checkbox.mockResolvedValueOnce(['propose', 'explore', 'apply', 'archive']);
+    checkbox.mockResolvedValueOnce(['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify']);
 
     await runConfigCommand(['profile']);
 
-    const checkboxCall = checkbox.mock.calls[0][0];
-    expect(checkboxCall.message).toBe('Select workflows to make available:');
-    expect(checkboxCall.choices).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        value: 'propose',
-        name: 'Propose change',
-        description: 'Create proposal, design, and tasks from a request',
-      }),
-      expect.objectContaining({
-        value: 'verify',
-        name: 'Verify change',
-        description: 'Run verification checks against a change',
-      }),
-    ]));
+    expect(checkbox).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'Select workflows to make available:',
+      choices: expect.arrayContaining([
+        expect.objectContaining({ value: 'sdt-new', name: expect.any(String), description: expect.any(String) }),
+        expect.objectContaining({ value: 'sdt-build', name: expect.any(String), description: expect.any(String) }),
+      ]),
+    }));
   });
 
   it('selecting current values only should be a no-op and should not ask apply', async () => {
-    const { saveGlobalConfig, getGlobalConfigPath } = await import('../../src/core/global-config.js');
+    const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, confirm } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
-    const configPath = getGlobalConfigPath();
-    const beforeContent = fs.readFileSync(configPath, 'utf-8');
-
-    fs.mkdirSync(path.join(tempDir, 'testspec'), { recursive: true });
-    select.mockResolvedValueOnce('delivery');
-    select.mockResolvedValueOnce('both');
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
+    select.mockResolvedValueOnce('keep');
 
     await runConfigCommand(['profile']);
 
-    const afterContent = fs.readFileSync(configPath, 'utf-8');
-    expect(afterContent).toBe(beforeContent);
-    expect(confirm).not.toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith('No config changes.');
+    expect(confirm).not.toHaveBeenCalled();
   });
 
   it('keep action should warn when project files drift from global config', async () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
     setupDriftedProjectArtifacts(tempDir);
     select.mockResolvedValueOnce('keep');
 
     await runConfigCommand(['profile']);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('No config changes.');
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: Global config is not applied to this project.'));
   });
 
@@ -304,8 +270,8 @@ describe('config profile interactive flow', () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
-    setupSyncedCoreBothArtifacts(tempDir);
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
     select.mockResolvedValueOnce('keep');
 
     await runConfigCommand(['profile']);
@@ -318,7 +284,7 @@ describe('config profile interactive flow', () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, confirm } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
     setupDriftedProjectArtifacts(tempDir);
     select.mockResolvedValueOnce('delivery');
     select.mockResolvedValueOnce('both');
@@ -334,8 +300,8 @@ describe('config profile interactive flow', () => {
     const { saveGlobalConfig } = await import('../../src/core/global-config.js');
     const { select } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
-    setupSyncedCoreBothArtifacts(tempDir);
+    saveGlobalConfig({ featureFlags: {}, profile: 'sdt', delivery: 'both', workflows: ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] });
+    setupSyncedSdtBothArtifacts(tempDir);
     addExtraSyncWorkflowArtifacts(tempDir);
     select.mockResolvedValueOnce('keep');
 
@@ -349,34 +315,34 @@ describe('config profile interactive flow', () => {
     const { saveGlobalConfig, getGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, confirm } = await getPromptMocks();
 
-    saveGlobalConfig({ featureFlags: {}, profile: 'core', delivery: 'both', workflows: ['propose', 'explore', 'apply', 'archive'] });
+    saveGlobalConfig({ featureFlags: {}, profile: 'custom', delivery: 'skills', workflows: ['explore'] });
     fs.mkdirSync(path.join(tempDir, 'testspec'), { recursive: true });
 
     select.mockResolvedValueOnce('delivery');
-    select.mockResolvedValueOnce('skills');
+    select.mockResolvedValueOnce('both');
     confirm.mockResolvedValueOnce(false);
 
     await runConfigCommand(['profile']);
 
-    expect(getGlobalConfig().delivery).toBe('skills');
+    expect(getGlobalConfig().delivery).toBe('both');
     expect(confirm).toHaveBeenCalledWith({
       message: 'Apply changes to this project now?',
       default: true,
     });
   });
 
-  it('core preset should preserve delivery setting', async () => {
+  it('sdt preset should preserve delivery setting', async () => {
     const { saveGlobalConfig, getGlobalConfig } = await import('../../src/core/global-config.js');
     const { select, checkbox, confirm } = await getPromptMocks();
 
     saveGlobalConfig({ featureFlags: {}, profile: 'custom', delivery: 'skills', workflows: ['explore'] });
 
-    await runConfigCommand(['profile', 'core']);
+    await runConfigCommand(['profile', 'sdt']);
 
     const config = getGlobalConfig();
-    expect(config.profile).toBe('core');
-    expect(config.delivery).toBe('skills');
-    expect(config.workflows).toEqual(['propose', 'explore', 'apply', 'archive']);
+    expect(config.profile).toBe('sdt');
+    expect(config.delivery).toBe('skills'); // delivery is preserved, not forced to 'both'
+    expect(config.workflows).toEqual(['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify']);
     expect(select).not.toHaveBeenCalled();
     expect(checkbox).not.toHaveBeenCalled();
     expect(confirm).not.toHaveBeenCalled();

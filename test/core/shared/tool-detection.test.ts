@@ -28,7 +28,7 @@ describe('tool-detection', () => {
 
   describe('SKILL_NAMES', () => {
     it('should contain all skill names matching COMMAND_IDS', () => {
-      expect(SKILL_NAMES).toHaveLength(11);
+      expect(SKILL_NAMES).toHaveLength(15);
       expect(SKILL_NAMES).toContain('testspec-explore');
       expect(SKILL_NAMES).toContain('testspec-new-change');
       expect(SKILL_NAMES).toContain('testspec-continue-change');

@@ -13,6 +13,9 @@ import type { Profile } from './global-config.js';
  */
 export const CORE_WORKFLOWS = ['propose', 'explore', 'apply', 'archive'] as const;
 
+// SDT-specific workflows
+export const SDT_WORKFLOWS = ['sdt-new', 'sdt-build', 'sdt-design', 'sdt-clarify'] as const;
+
 /**
  * All available workflows in the system.
  */
@@ -50,5 +53,9 @@ export function getProfileWorkflows(
   if (profile === 'custom') {
     return customWorkflows ?? ALL_WORKFLOWS;
   }
+  if (profile === 'sdt') {
+    return SDT_WORKFLOWS;
+  }
+  // Default to core workflows for the 'core' profile
   return CORE_WORKFLOWS;
 }
