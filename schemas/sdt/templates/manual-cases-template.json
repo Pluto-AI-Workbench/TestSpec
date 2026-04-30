@@ -1,0 +1,142 @@
+{
+  "test_suite": "{{capability}} 手工测试案例",
+  "version": "{{version}}",
+  "generated_date": "{{date}}",
+  "based_on": {
+    "sdt_spec": "sdt-spec.md",
+    "test_points": "test-points.md"
+  },
+  "test_cases": [
+    {
+      "case_id": "TC-001",
+      "case_name": "示例测试案例",
+      "case_level": "P0",
+      "functional_description": "验证用户能够使用正确的用户名和密码成功登录系统",
+      "module": "认证模块",
+      "preconditions": [
+        "1. 测试环境已部署完成",
+        "2. 测试用户已创建（用户名：testuser，密码：Test123456）",
+        "3. 测试浏览器已启动并访问登录页面"
+      ],
+      "test_steps": [
+        {
+          "step": 1,
+          "action": "在用户名输入框输入 testuser",
+          "expected_result": "用户名正确显示在输入框中"
+        },
+        {
+          "step": 2,
+          "action": "在密码输入框输入 Test123456",
+          "expected_result": "密码显示为脱敏符号（***）"
+        },
+        {
+          "step": 3,
+          "action": "点击登录按钮",
+          "expected_result": "页面跳转到首页，显示用户信息"
+        }
+      ],
+      "test_data": {
+        "username": "testuser",
+        "password": "Test123456"
+      },
+      "priority": "高",
+      "linked_tp": ["TP-F-001"],
+      "tags": ["登录", "正常场景", "P0"],
+      "expected_duration": "5秒"
+    },
+    {
+      "case_id": "TC-002",
+      "case_name": "示例测试案例 - 边界值测试",
+      "case_level": "P1",
+      "functional_description": "验证用户名边界值输入时的系统行为（最大长度验证）",
+      "module": "认证模块",
+      "preconditions": [
+        "1. 测试环境已部署完成",
+        "2. 测试浏览器已启动并访问登录页面"
+      ],
+      "test_steps": [
+        {
+          "step": 1,
+          "action": "在用户名输入框输入超出最大长度的用户名（33个字符：aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa）",
+          "expected_result": "系统拒绝输入或截断至最大长度"
+        },
+        {
+          "step": 2,
+          "action": "在密码输入框输入正确密码 Test123456",
+          "expected_result": "密码正常输入"
+        },
+        {
+          "step": 3,
+          "action": "点击登录按钮",
+          "expected_result": "系统返回错误提示：用户名或密码错误"
+        }
+      ],
+      "test_data": {
+        "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "password": "Test123456",
+        "max_length": 32
+      },
+      "priority": "中",
+      "linked_tp": ["TP-B-001"],
+      "tags": ["登录", "边界值", "用户名长度"],
+      "expected_duration": "10秒"
+    },
+    {
+      "case_id": "TC-003",
+      "case_name": "示例测试案例 - 异常测试",
+      "case_level": "P0",
+      "functional_description": "验证使用错误密码登录时系统返回正确的错误提示",
+      "module": "认证模块",
+      "preconditions": [
+        "1. 测试环境已部署完成",
+        "2. 测试用户已创建（用户名：testuser，密码：Test123456）",
+        "3. 测试浏览器已启动并访问登录页面"
+      ],
+      "test_steps": [
+        {
+          "step": 1,
+          "action": "在用户名输入框输入 testuser",
+          "expected_result": "用户名正确显示"
+        },
+        {
+          "step": 2,
+          "action": "在密码输入框输入错误密码 WrongPassword123",
+          "expected_result": "密码显示为脱敏符号"
+        },
+        {
+          "step": 3,
+          "action": "点击登录按钮",
+          "expected_result": "页面显示错误提示：用户名或密码错误"
+        }
+      ],
+      "test_data": {
+        "username": "testuser",
+        "password": "WrongPassword123"
+      },
+      "priority": "高",
+      "linked_tp": ["TP-E-001"],
+      "tags": ["登录", "异常场景", "密码错误"],
+      "expected_duration": "5秒"
+    }
+  ],
+  "test_case_summary": {
+    "total": 3,
+    "P0": 2,
+    "P1": 1,
+    "P2": 0
+  },
+  "field_definitions": {
+    "case_id": "测试案例唯一标识，格式：TC-XXX",
+    "case_name": "测试案例名称，应简洁明了",
+    "case_level": "测试等级：P0=核心功能，P1=重要功能，P2=一般功能",
+    "functional_description": "详细描述此案例测试的业务逻辑和目的",
+    "module": "所属功能模块",
+    "preconditions": "进入该测试场景的前置条件列表，每条为独立的步骤",
+    "test_steps": "操作步骤数组，每步包含操作描述和预期结果",
+    "test_data": "测试所需的数据键值对",
+    "priority": "执行优先级：高/中/低",
+    "linked_tp": "关联的测试要点ID列表",
+    "tags": "标签，用于分类和筛选",
+    "expected_duration": "预期执行时长"
+  }
+}
