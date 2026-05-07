@@ -15,7 +15,7 @@ vi.mock('posthog-node', () => {
 });
 
 // Import after mocking
-import { isTelemetryEnabled, isDetailTelemetryEnabled, maybeShowTelemetryNotice, shutdown, trackCommand } from '../../src/telemetry/index.js';
+import { isTelemetryEnabled, isDetailTelemetryEnabled, maybeShowTelemetryNotice, shutdown, trackCommand, TelemetryDetails } from '../../src/telemetry/index.js';
 import { PostHog } from 'posthog-node';
 
 describe('telemetry/index', () => {
@@ -232,6 +232,83 @@ describe('telemetry/index', () => {
       const response = await fetchFn('https://edge.testspec.dev/batch/', { method: 'POST' });
 
       expect(response).toBe(expectedResponse);
+    });
+  });
+
+  describe('trackCommand with details', () => {
+    it('should include detail fields when detail telemetry is enabled', async () => {
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      delete process.env.TESTSPEC_TELEMETRY_DETAIL;
+
+      const mockCapture = vi.fn();
+      (PostHog as any).mockImplementation(() => ({
+        capture: mockCapture,
+        shutdown: vi.fn().mockResolvedValue(undefined),
+      }));
+
+      const details = {
+        durationMs: 1234,
+        args: { json: true },
+        skill: 'testspec:propose',
+        skillTool: 'claude',
+        inputs: { changeName: 'add-login' },
+        outputs: [{ name: 'proposal.md', size: 1024, status: 'done' as const }],
+        tokens: { input: 100, output: 200, total: 300 },
+      };
+
+      await trackCommand('test:cmd', '1.0.0', details);
+
+      expect(PostHog).toHaveBeenCalled();
+      const captureCall = mockCapture.mock.calls[0][0];
+      expect(captureCall.properties.durationMs).toBe(1234);
+      expect(captureCall.properties.skill).toBe('testspec:propose');
+      expect(captureCall.properties.outputs).toEqual([{ name: 'proposal.md', size: 1024, status: 'done' }]);
+    });
+
+    it('should omit detail fields when TESTSPEC_TELEMETRY_DETAIL=0', async () => {
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      process.env.TESTSPEC_TELEMETRY_DETAIL = '0';
+
+      const mockCapture = vi.fn();
+      (PostHog as any).mockImplementation(() => ({
+        capture: mockCapture,
+        shutdown: vi.fn().mockResolvedValue(undefined),
+      }));
+
+      const details = {
+        durationMs: 1234,
+        skill: 'testspec:propose',
+      };
+
+      await trackCommand('test:cmd', '1.0.0', details);
+
+      const captureCall = mockCapture.mock.calls[0][0];
+      expect(captureCall.properties.durationMs).toBeUndefined();
+      expect(captureCall.properties.skill).toBeUndefined();
+    });
+
+    it('should truncate input strings to 200 characters', async () => {
+      delete process.env.TESTSPEC_TELEMETRY_DETAIL;
+
+      const mockCapture = vi.fn();
+      (PostHog as any).mockImplementation(() => ({
+        capture: mockCapture,
+        shutdown: vi.fn().mockResolvedValue(undefined),
+      }));
+
+      const longString = 'a'.repeat(300);
+      const details = {
+        inputs: { description: longString },
+      };
+
+      await trackCommand('test:cmd', '1.0.0', details);
+
+      const captureCall = mockCapture.mock.calls[0][0];
+      expect((captureCall.properties.inputs as any).description.length).toBe(200);
     });
   });
 

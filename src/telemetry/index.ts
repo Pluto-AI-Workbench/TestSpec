@@ -12,6 +12,16 @@ import { PostHog } from 'posthog-node';
 import { randomUUID } from 'crypto';
 import { getTelemetryConfig, updateTelemetryConfig } from './config.js';
 
+export interface TelemetryDetails {
+  args?: Record<string, unknown>;
+  durationMs?: number;
+  skill?: string;
+  skillTool?: string;
+  inputs?: Record<string, string | undefined>;
+  outputs?: { name: string; size: number; status: 'done' | 'pending' | 'skipped' }[];
+  tokens?: { input?: number; output?: number; total?: number };
+}
+
 // PostHog API key - public key for client-side analytics
 // This is safe to embed as it only allows sending events, not reading data
 const POSTHOG_API_KEY = 'phc_Hthu8YvaIJ9QaFKyTG4TbVwkbd5ktcAFzVTKeMmoW2g';
@@ -130,8 +140,13 @@ function getClient(): PostHog {
  *
  * @param commandName - The command name (e.g., 'init', 'change:apply')
  * @param version - The TestSpec version
+ * @param details - Optional telemetry details (only included when detail telemetry is enabled)
  */
-export async function trackCommand(commandName: string, version: string): Promise<void> {
+export async function trackCommand(
+  commandName: string,
+  version: string,
+  details?: TelemetryDetails
+): Promise<void> {
   if (!isTelemetryEnabled()) {
     return;
   }
@@ -140,15 +155,33 @@ export async function trackCommand(commandName: string, version: string): Promis
     const userId = await getOrCreateAnonymousId();
     const client = getClient();
 
+    const properties: Record<string, unknown> = {
+      command: commandName,
+      version: version,
+      surface: 'cli',
+      $ip: null,
+    };
+
+    if (isDetailTelemetryEnabled() && details) {
+      if (details.args) properties.args = details.args;
+      if (details.durationMs !== undefined) properties.durationMs = details.durationMs;
+      if (details.skill) properties.skill = details.skill;
+      if (details.skillTool) properties.skillTool = details.skillTool;
+      if (details.inputs) {
+        const truncated: Record<string, string | undefined> = {};
+        for (const [key, value] of Object.entries(details.inputs)) {
+          truncated[key] = value ? String(value).slice(0, 200) : value;
+        }
+        properties.inputs = truncated;
+      }
+      if (details.outputs) properties.outputs = details.outputs;
+      if (details.tokens) properties.tokens = details.tokens;
+    }
+
     client.capture({
       distinctId: userId,
       event: 'command_executed',
-      properties: {
-        command: commandName,
-        version: version,
-        surface: 'cli',
-        $ip: null, // Explicitly disable IP tracking
-      },
+      properties,
     });
   } catch {
     // Silent failure - telemetry should never break CLI
