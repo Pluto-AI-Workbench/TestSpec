@@ -9,13 +9,13 @@ TestSpec helps you and your AI coding assistant agree on what to build before an
 **Default quick path (core profile):**
 
 ```text
-/testspec:propose ──�?/testspec:apply ──�?/testspec:archive
+/testspec:propose ──�?/testspec:apply ──�?/testspec:archive
 ```
 
 **Expanded path (custom workflow selection):**
 
 ```text
-/testspec:new ──�?/testspec:ff or /testspec:continue ──�?/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
+/testspec:new ──�?/testspec:ff or /testspec:continue ──�?/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
 ```
 
 The default global profile is `core`, which includes `propose`, `explore`, `apply`, and `archive`. You can enable the expanded workflow commands with `TestSpec config profile` and then `TestSpec update`.
@@ -27,16 +27,16 @@ After running `TestSpec init`, your project has this structure:
 ```
 TestSpec/
 ├── specs/              # Source of truth (your system's behavior)
-�?  └── <domain>/
-�?      └── spec.md
+�?  └── <domain>/
+�?      └── spec.md
 ├── changes/            # Proposed updates (one folder per change)
-�?  └── <change-name>/
-�?      ├── proposal.md
-�?      ├── design.md
-�?      ├── tasks.md
-�?      └── specs/      # Delta specs (what's changing)
-�?          └── <domain>/
-�?              └── spec.md
+�?  └── <change-name>/
+�?      ├── proposal.md
+�?      ├── design.md
+�?      ├── tasks.md
+�?      └── specs/      # Delta specs (what's changing)
+�?          └── <domain>/
+�?              └── spec.md
 └── config.yaml         # Project configuration (optional)
 ```
 
@@ -60,9 +60,9 @@ Each change folder contains artifacts that guide the work:
 **Artifacts build on each other:**
 
 ```
-proposal ──�?specs ──�?design ──�?tasks ──�?implement
-   �?          �?         �?                   �?
-   └───────────┴──────────┴────────────────────�?
+proposal ──�?specs ──�?design ──�?tasks ──�?implement
+   �?          �?         �?                   �?
+   └───────────┴──────────┴────────────────────�?
             update as you learn
 ```
 
@@ -126,10 +126,10 @@ Let's walk through adding dark mode to an application.
 You: /testspec:propose add-dark-mode
 
 AI:  Created TestSpec/changes/add-dark-mode/
-     �?proposal.md �?why we're doing this, what's changing
-     �?specs/       �?requirements and scenarios
-     �?design.md    �?technical approach
-     �?tasks.md     �?implementation checklist
+     �?proposal.md �?why we're doing this, what's changing
+     �?specs/       �?requirements and scenarios
+     �?design.md    �?technical approach
+     �?tasks.md     �?implementation checklist
      Ready for implementation!
 ```
 
@@ -204,10 +204,10 @@ The system SHALL allow users to choose between light and dark themes.
 You: /testspec:apply
 
 AI:  Working through tasks...
-     �?1.1 Created ThemeContext with light/dark state
-     �?1.2 Added CSS custom properties to globals.css
-     �?1.3 Implemented localStorage persistence
-     �?2.1 Created ThemeToggle component
+     �?1.1 Created ThemeContext with light/dark state
+     �?1.2 Added CSS custom properties to globals.css
+     �?1.3 Implemented localStorage persistence
+     �?2.1 Created ThemeToggle component
      ...
      All tasks complete!
 ```
@@ -220,8 +220,8 @@ During implementation, if you discover the design needs adjustment, just update 
 You: /testspec:archive
 
 AI:  Archiving add-dark-mode...
-     �?Merged specs into TestSpec/specs/ui/spec.md
-     �?Moved to TestSpec/changes/archive/2025-01-24-add-dark-mode/
+     �?Merged specs into TestSpec/specs/ui/spec.md
+     �?Moved to TestSpec/changes/archive/2025-01-24-add-dark-mode/
      Done! Ready for the next feature.
 ```
 

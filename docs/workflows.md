@@ -11,14 +11,14 @@ OPSX takes a different approach:
 ```text
 Traditional (phase-locked):
 
-  PLANNING ────────�?IMPLEMENTING ────────�?DONE
-      �?                   �?
-      �?  "Can't go back"  �?
-      └────────────────────�?
+  PLANNING ────────�?IMPLEMENTING ────────�?DONE
+      �?                   �?
+      �?  "Can't go back"  �?
+      └────────────────────�?
 
 OPSX (fluid actions):
 
-  proposal ──�?specs ──�?design ──�?tasks ──�?implement
+  proposal ──�?specs ──�?design ──�?tasks ──�?implement
 ```
 
 **Key principles:**
@@ -38,10 +38,11 @@ New installs default to `core`, which provides:
 - `/testspec:apply`
 - `/testspec:archive`
 
+
 Typical flow:
 
 ```text
-/testspec:propose ──�?/testspec:apply ──�?/testspec:archive
+/testspec:propose ──�?/testspec:apply ──�?/testspec:archive
 ```
 
 ### Expanded/Full Workflow (custom selection)
@@ -60,7 +61,7 @@ TestSpec update
 When you know what you want to build and just need to execute:
 
 ```text
-/testspec:new ──�?/testspec:ff ──�?/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
+/testspec:new ──�?/testspec:ff ──�?/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
 ```
 
 **Example conversation:**
@@ -74,24 +75,24 @@ AI:  Created TestSpec/changes/add-logout-button/
 You: /testspec:ff
 
 AI:  Creating all planning artifacts...
-     �?proposal.md
-     �?specs/
-     �?design.md
-     �?tasks.md
+     �?proposal.md
+     �?specs/
+     �?design.md
+     �?tasks.md
      Ready for implementation!
 
 You: /testspec:apply
 
 AI:  Working through tasks...
-     �?Added logout button to header
-     �?Implemented session clearing
-     �?Added confirmation dialog
+     �?Added logout button to header
+     �?Implemented session clearing
+     �?Added confirmation dialog
      All tasks complete!
 
 You: /testspec:archive
 
-AI:  �?Merged specs
-     �?Archived change
+AI:  �?Merged specs
+     �?Archived change
 ```
 
 **Best for:** Small to medium features, bug fixes, straightforward changes.
@@ -101,7 +102,7 @@ AI:  �?Merged specs
 When requirements are unclear or you need to investigate first:
 
 ```text
-/testspec:explore ──�?/testspec:new ──�?/testspec:continue ──�?... ──�?/testspec:apply
+/testspec:explore ──�?/testspec:new ──�?/testspec:continue ──�?... ──�?/testspec:apply
 ```
 
 **Example conversation:**
@@ -151,11 +152,11 @@ AI:  Creating specs...
 Work on multiple changes at once:
 
 ```text
-Change A: /testspec:new ──�?/testspec:ff ──�?/testspec:apply (in progress)
-                                         �?
+Change A: /testspec:new ──�?/testspec:ff ──�?/testspec:apply (in progress)
+                                         �?
                                     context switch
-                                         �?
-Change B: /testspec:new ──�?/testspec:ff ──────�?/testspec:apply
+                                         �?
+Change B: /testspec:new ──�?/testspec:ff ──────�?/testspec:apply
 ```
 
 **Example conversation:**
@@ -169,7 +170,7 @@ AI:  Created TestSpec/changes/fix-login-redirect/
 
 You: /testspec:ff
 
-AI:  �?Created planning artifacts
+AI:  �?Created planning artifacts
 
 You: /testspec:apply
 
@@ -179,7 +180,7 @@ AI:  Working on fix-login-redirect...
 
 You: /testspec:archive
 
-AI:  �?Archived fix-login-redirect
+AI:  �?Archived fix-login-redirect
 
 You: Let's get back to dark mode
 
@@ -202,7 +203,7 @@ AI:  Found 3 completed changes:
      - update-footer (all tasks done)
 
      Checking for spec conflicts...
-     �?add-dark-mode and update-footer both touch specs/ui/
+     �?add-dark-mode and update-footer both touch specs/ui/
 
      Inspecting codebase to resolve...
      Both changes are implemented. Will apply in chronological order.
@@ -211,10 +212,10 @@ AI:  Found 3 completed changes:
 
 You: Yes
 
-AI:  �?Archived add-dark-mode
-     �?Archived fix-login-redirect
-     �?Archived update-footer
-     Specs merged in order: add-dark-mode �?update-footer
+AI:  �?Archived add-dark-mode
+     �?Archived fix-login-redirect
+     �?Archived update-footer
+     Specs merged in order: add-dark-mode �?update-footer
 ```
 
 Bulk archive detects when multiple changes touch the same specs and resolves conflicts by checking what's actually implemented.
@@ -224,8 +225,8 @@ Bulk archive detects when multiple changes touch the same specs and resolves con
 The recommended completion flow:
 
 ```text
-/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
-                    �?                �?
+/testspec:apply ──�?/testspec:verify ──�?/testspec:archive
+                    �?                �?
               validates          prompts to sync
               implementation     if needed
 ```
@@ -240,19 +241,19 @@ You: /testspec:verify
 AI:  Verifying add-auth...
 
      COMPLETENESS
-     �?All 12 tasks in tasks.md are checked
-     �?All requirements in specs have corresponding code
-     �?Scenario "Session timeout after inactivity" not tested
+     �?All 12 tasks in tasks.md are checked
+     �?All requirements in specs have corresponding code
+     �?Scenario "Session timeout after inactivity" not tested
 
      CORRECTNESS
-     �?Implementation matches spec intent
-     �?Edge cases from scenarios are handled
-     �?Error states match spec definitions
+     �?Implementation matches spec intent
+     �?Edge cases from scenarios are handled
+     �?Error states match spec definitions
 
      COHERENCE
-     �?Design decisions reflected in code structure
-     �?Naming conventions consistent with design.md
-     �?Design mentions "event-driven" but implementation uses polling
+     �?Design decisions reflected in code structure
+     �?Naming conventions consistent with design.md
+     �?Design mentions "event-driven" but implementation uses polling
 
      SUMMARY
      ─────────────────────────────
@@ -285,18 +286,18 @@ You: /testspec:archive
 AI:  Archiving add-auth...
 
      Artifact status:
-     �?proposal.md exists
-     �?specs/ exists
-     �?design.md exists
-     �?tasks.md exists (12/12 tasks complete)
+     �?proposal.md exists
+     �?specs/ exists
+     �?design.md exists
+     �?tasks.md exists (12/12 tasks complete)
 
      Delta specs: Not yet synced to main
-     �?Would you like to sync now?
+     �?Would you like to sync now?
 
 You: Yes
 
-AI:  �?Synced specs to TestSpec/specs/auth/spec.md
-     �?Moved to TestSpec/changes/archive/2025-01-24-add-auth/
+AI:  �?Synced specs to TestSpec/specs/auth/spec.md
+     �?Moved to TestSpec/changes/archive/2025-01-24-add-auth/
 
      Change archived successfully.
 ```
@@ -336,30 +337,30 @@ A common question: when is updating an existing change okay, and when should you
 - Patches would confuse more than clarify
 
 ```text
-                     ┌─────────────────────────────────────�?
-                     �?    Is this the same work?          �?
-                     └──────────────┬──────────────────────�?
-                                    �?
-                 ┌──────────────────┼──────────────────�?
-                 �?                 �?                 �?
-                 �?                 �?                 �?
+                     ┌─────────────────────────────────────�?
+                     �?    Is this the same work?          �?
+                     └──────────────┬──────────────────────�?
+                                    �?
+                 ┌──────────────────┼──────────────────�?
+                 �?                 �?                 �?
+                 �?                 �?                 �?
           Same intent?      >50% overlap?      Can original
           Same problem?     Same scope?        be "done" without
-                 �?                 �?         these changes?
-                 �?                 �?                 �?
-       ┌────────┴────────�? ┌──────┴──────�?  ┌───────┴───────�?
-       �?                �? �?            �?  �?              �?
+                 �?                 �?         these changes?
+                 �?                 �?                 �?
+       ┌────────┴────────�? ┌──────┴──────�?  ┌───────┴───────�?
+       �?                �? �?            �?  �?              �?
       YES               NO YES           NO  NO              YES
-       �?                �? �?            �?  �?              �?
-       �?                �? �?            �?  �?              �?
+       �?                �? �?            �?  �?              �?
+       �?                �? �?            �?  �?              �?
     UPDATE            NEW  UPDATE       NEW  UPDATE          NEW
 ```
 
 **Example: "Add dark mode"**
 
-- "Need to also support custom themes" �?New change (scope exploded)
-- "System preference detection is harder than expected" �?Update (same intent)
-- "Let's ship toggle first, add preferences later" �?Update then archive, then new change
+- "Need to also support custom themes" �?New change (scope exploded)
+- "System preference detection is harder than expected" �?Update (same intent)
+- "Let's ship toggle first, add preferences later" �?Update then archive, then new change
 
 ## Best Practices
 
@@ -406,9 +407,9 @@ You: /testspec:verify
 
 AI:  Verifying add-dark-mode...
 
-     �?All tasks in tasks.md are checked
-     �?Requirements in specs have corresponding code
-     �?Design decisions are reflected in implementation
+     �?All tasks in tasks.md are checked
+     �?Requirements in specs have corresponding code
+     �?Design decisions are reflected in implementation
 
      Ready to archive!
 ```
