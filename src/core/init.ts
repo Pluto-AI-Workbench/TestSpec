@@ -19,7 +19,7 @@ import {
 } from './config.js';
 import { PALETTE } from './styles/palette.js';
 import { isInteractive } from '../utils/interactive.js';
-import { serializeConfig } from './config-prompts.js';
+import { serializeConfig, DEFAULT_PROFILES } from './config-prompts.js';
 import {
   generateCommands,
   CommandAdapterRegistry,
@@ -619,7 +619,7 @@ export class InitCommand {
     }
 
     try {
-      const yamlContent = serializeConfig({ schema: DEFAULT_SCHEMA });
+      const yamlContent = serializeConfig({ schema: DEFAULT_SCHEMA, profiles: DEFAULT_PROFILES });
       await FileSystemUtils.writeFile(configPath, yamlContent);
       return 'created';
     } catch {
