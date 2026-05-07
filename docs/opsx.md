@@ -6,40 +6,40 @@
 
 OPSX is now the standard workflow for TestSpec.
 
-It's a **fluid, iterative workflow** for TestSpec changes. No more rigid phases �?just actions you can take anytime.
+It's a **fluid, iterative workflow** for TestSpec changes. No more rigid phases �?just actions you can take anytime.
 
 ## Why This Exists
 
 The legacy TestSpec workflow works, but it's **locked down**:
 
-- **Instructions are hardcoded** �?buried in TypeScript, you can't change them
-- **All-or-nothing** �?one big command creates everything, can't test individual pieces
-- **Fixed structure** �?same workflow for everyone, no customization
-- **Black box** �?when AI output is bad, you can't tweak the prompts
+- **Instructions are hardcoded** �?buried in TypeScript, you can't change them
+- **All-or-nothing** �?one big command creates everything, can't test individual pieces
+- **Fixed structure** �?same workflow for everyone, no customization
+- **Black box** �?when AI output is bad, you can't tweak the prompts
 
 **OPSX opens it up.** Now anyone can:
 
-1. **Experiment with instructions** �?edit a template, see if the AI does better
-2. **Test granularly** �?validate each artifact's instructions independently
-3. **Customize workflows** �?define your own artifacts and dependencies
-4. **Iterate quickly** �?change a template, test immediately, no rebuild
+1. **Experiment with instructions** �?edit a template, see if the AI does better
+2. **Test granularly** �?validate each artifact's instructions independently
+3. **Customize workflows** �?define your own artifacts and dependencies
+4. **Iterate quickly** �?change a template, test immediately, no rebuild
 
 ```
 Legacy workflow:                      OPSX:
-┌────────────────────────�?          ┌────────────────────────�?
-�? Hardcoded in package  �?          �? schema.yaml           │◄── You edit this
-�? (can't change)        �?          �? templates/*.md        │◄── Or this
-�?       �?              �?          �?       �?              �?
-�? Wait for new release  �?          �? Instant effect        �?
-�?       �?              �?          �?       �?              �?
-�? Hope it's better      �?          �? Test it yourself      �?
-└────────────────────────�?          └────────────────────────�?
+┌────────────────────────�?          ┌────────────────────────�?
+�? Hardcoded in package  �?          �? schema.yaml           │◄── You edit this
+�? (can't change)        �?          �? templates/*.md        │◄── Or this
+�?       �?              �?          �?       �?              �?
+�? Wait for new release  �?          �? Instant effect        �?
+�?       �?              �?          �?       �?              �?
+�? Hope it's better      �?          �? Test it yourself      �?
+└────────────────────────�?          └────────────────────────�?
 ```
 
 **This is for everyone:**
-- **Teams** �?create workflows that match how you actually work
-- **Power users** �?tweak prompts to get better AI outputs for your codebase
-- **TestSpec contributors** �?experiment with new approaches without releases
+- **Teams** �?create workflows that match how you actually work
+- **Power users** �?tweak prompts to get better AI outputs for your codebase
+- **TestSpec contributors** �?experiment with new approaches without releases
 
 We're all still learning what works best. OPSX lets us learn together.
 
@@ -49,17 +49,17 @@ We're all still learning what works best. OPSX lets us learn together.
 You're "in planning phase", then "in implementation phase", then "done". But real work doesn't work that way. You implement something, realize your design was wrong, need to update specs, continue implementing. Linear phases fight against how work actually happens.
 
 **OPSX approach:**
-- **Actions, not phases** �?create, implement, update, archive �?do any of them anytime
-- **Dependencies are enablers** �?they show what's possible, not what's required next
+- **Actions, not phases** �?create, implement, update, archive �?do any of them anytime
+- **Dependencies are enablers** �?they show what's possible, not what's required next
 
 ```
-  proposal ──�?specs ──�?design ──�?tasks ──�?implement
+  proposal ──�?specs ──�?design ──�?tasks ──�?implement
 ```
 
 ## Setup
 
 ```bash
-# Make sure you have TestSpec installed �?skills are automatically generated
+# Make sure you have TestSpec installed �?skills are automatically generated
 TestSpec init
 ```
 
@@ -126,10 +126,10 @@ rules:
 ### Artifact IDs by Schema
 
 **spec-driven** (default):
-- `proposal` �?Change proposal
-- `specs` �?Specifications
-- `design` �?Technical design
-- `tasks` �?Implementation tasks
+- `proposal` �?Change proposal
+- `specs` �?Specifications
+- `design` �?Technical design
+- `tasks` �?Implementation tasks
 
 ### Config Validation
 
@@ -168,6 +168,7 @@ rules:
 | `/testspec:archive` | Archive when done |
 | `/testspec:bulk-archive` | Archive multiple completed changes (expanded workflow) |
 | `/testspec:onboard` | Guided walkthrough of an end-to-end change (expanded workflow) |
+
 
 ## Usage
 
@@ -220,9 +221,9 @@ You can always edit your proposal or specs before implementation. But when does 
 ### What a Proposal Captures
 
 A proposal defines three things:
-1. **Intent** �?What problem are you solving?
-2. **Scope** �?What's in/out of bounds?
-3. **Approach** �?How will you solve it?
+1. **Intent** �?What problem are you solving?
+2. **Scope** �?What's in/out of bounds?
+3. **Approach** �?How will you solve it?
 
 The question is: which changed, and by how much?
 
@@ -235,48 +236,48 @@ The question is: which changed, and by how much?
 
 **Scope narrows**
 - You realize full scope is too big, want to ship MVP first
-- "Add dark mode" �?"Add dark mode toggle (system preference in v2)"
+- "Add dark mode" �?"Add dark mode toggle (system preference in v2)"
 
 **Learning-driven corrections**
 - Codebase isn't structured how you thought
 - A dependency doesn't work as expected
-- "Use CSS variables" �?"Use Tailwind's dark: prefix instead"
+- "Use CSS variables" �?"Use Tailwind's dark: prefix instead"
 
 ### Start a New Change When:
 
 **Intent fundamentally changed**
 - The problem itself is different now
-- "Add dark mode" �?"Add comprehensive theme system with custom colors, fonts, spacing"
+- "Add dark mode" �?"Add comprehensive theme system with custom colors, fonts, spacing"
 
 **Scope exploded**
 - Change grew so much it's essentially different work
 - Original proposal would be unrecognizable after updates
-- "Fix login bug" �?"Rewrite auth system"
+- "Fix login bug" �?"Rewrite auth system"
 
 **Original is completable**
 - The original change can be marked "done"
 - New work stands alone, not a refinement
-- Complete "Add dark mode MVP" �?Archive �?New change "Enhance dark mode"
+- Complete "Add dark mode MVP" �?Archive �?New change "Enhance dark mode"
 
 ### The Heuristics
 
 ```
-                        ┌─────────────────────────────────────�?
-                        �?    Is this the same work?          �?
-                        └──────────────┬──────────────────────�?
-                                       �?
-                    ┌──────────────────┼──────────────────�?
-                    �?                 �?                 �?
-                    �?                 �?                 �?
+                        ┌─────────────────────────────────────�?
+                        �?    Is this the same work?          �?
+                        └──────────────┬──────────────────────�?
+                                       �?
+                    ┌──────────────────┼──────────────────�?
+                    �?                 �?                 �?
+                    �?                 �?                 �?
              Same intent?      >50% overlap?      Can original
              Same problem?     Same scope?        be "done" without
-                    �?                 �?         these changes?
-                    �?                 �?                 �?
-          ┌────────┴────────�? ┌──────┴──────�?  ┌───────┴───────�?
-          �?                �? �?            �?  �?              �?
+                    �?                 �?         these changes?
+                    �?                 �?                 �?
+          ┌────────┴────────�? ┌──────┴──────�?  ┌───────┴───────�?
+          �?                �? �?            �?  �?              �?
          YES               NO YES           NO  NO              YES
-          �?                �? �?            �?  �?              �?
-          �?                �? �?            �?  �?              �?
+          �?                �? �?            �?  �?              �?
+          �?                �? �?            �?  �?              �?
        UPDATE            NEW  UPDATE       NEW  UPDATE          NEW
 ```
 
@@ -304,7 +305,7 @@ Think of it like git branches:
 | | Legacy (`/TestSpec:proposal`) | OPSX (`/testspec:*`) |
 |---|---|---|
 | **Structure** | One big proposal document | Discrete artifacts with dependencies |
-| **Workflow** | Linear phases: plan �?implement �?archive | Fluid actions �?do anything anytime |
+| **Workflow** | Linear phases: plan �?implement �?archive | Fluid actions �?do anything anytime |
 | **Iteration** | Awkward to go back | Update artifacts as you learn |
 | **Customization** | Fixed structure | Schema-driven (define your own artifacts) |
 
@@ -313,50 +314,51 @@ Think of it like git branches:
 ## Architecture Deep Dive
 
 This section explains how OPSX works under the hood and how it compares to the legacy workflow.
-Examples in this section use the expanded command set (`new`, `continue`, etc.); default `core` users can map the same flow to `propose �?apply �?archive`.
+
+Examples in this section use the expanded command set (`new`, `continue`, etc.); default `core` users can map the same flow to `propose �?apply �?archive`.
 
 ### Philosophy: Phases vs Actions
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────�?
-�?                        LEGACY WORKFLOW                                      �?
-�?                   (Phase-Locked, All-or-Nothing)                           �?
-├─────────────────────────────────────────────────────────────────────────────�?
-�?                                                                            �?
-�?  ┌──────────────�?     ┌──────────────�?     ┌──────────────�?            �?
-�?  �?  PLANNING   �?───�?�?IMPLEMENTING �?───�?�?  ARCHIVING  �?            �?
-�?  �?   PHASE     �?     �?   PHASE     �?     �?   PHASE     �?            �?
-�?  └──────────────�?     └──────────────�?     └──────────────�?            �?
-�?        �?                    �?                    �?                      �?
-�?        �?                    �?                    �?                      �?
-�?  /TestSpec:proposal   /TestSpec:apply      /TestSpec:archive              �?
-�?                                                                            �?
-�?  �?Creates ALL artifacts at once                                          �?
-�?  �?Can't go back to update specs during implementation                    �?
-�?  �?Phase gates enforce linear progression                                  �?
-�?                                                                            �?
-└─────────────────────────────────────────────────────────────────────────────�?
+┌─────────────────────────────────────────────────────────────────────────────�?
+�?                        LEGACY WORKFLOW                                      �?
+�?                   (Phase-Locked, All-or-Nothing)                           �?
+├─────────────────────────────────────────────────────────────────────────────�?
+�?                                                                            �?
+�?  ┌──────────────�?     ┌──────────────�?     ┌──────────────�?            �?
+�?  �?  PLANNING   �?───�?�?IMPLEMENTING �?───�?�?  ARCHIVING  �?            �?
+�?  �?   PHASE     �?     �?   PHASE     �?     �?   PHASE     �?            �?
+�?  └──────────────�?     └──────────────�?     └──────────────�?            �?
+�?        �?                    �?                    �?                      �?
+�?        �?                    �?                    �?                      �?
+�?  /TestSpec:proposal   /TestSpec:apply      /TestSpec:archive              �?
+�?                                                                            �?
+�?  �?Creates ALL artifacts at once                                          �?
+�?  �?Can't go back to update specs during implementation                    �?
+�?  �?Phase gates enforce linear progression                                  �?
+�?                                                                            �?
+└─────────────────────────────────────────────────────────────────────────────�?
 
 
-┌─────────────────────────────────────────────────────────────────────────────�?
-�?                           OPSX WORKFLOW                                     �?
-�?                     (Fluid Actions, Iterative)                             �?
-├─────────────────────────────────────────────────────────────────────────────�?
-�?                                                                            �?
-�?             ┌────────────────────────────────────────────�?                �?
-�?             �?          ACTIONS (not phases)             �?                �?
-�?             �?                                           �?                �?
-�?             �?  new ◄──�?continue ◄──�?apply ◄──�?archive �?                �?
-�?             �?   �?         �?          �?          �?   �?                �?
-�?             �?   └──────────┴───────────┴───────────�?   �?                �?
-�?             �?             any order                     �?                �?
-�?             └────────────────────────────────────────────�?                �?
-�?                                                                            �?
-�?  �?Create artifacts one at a time OR fast-forward                         �?
-�?  �?Update specs/design/tasks during implementation                        �?
-�?  �?Dependencies enable progress, phases don't exist                       �?
-�?                                                                            �?
-└─────────────────────────────────────────────────────────────────────────────�?
+┌─────────────────────────────────────────────────────────────────────────────�?
+�?                           OPSX WORKFLOW                                     �?
+�?                     (Fluid Actions, Iterative)                             �?
+├─────────────────────────────────────────────────────────────────────────────�?
+�?                                                                            �?
+�?             ┌────────────────────────────────────────────�?                �?
+�?             �?          ACTIONS (not phases)             �?                �?
+�?             �?                                           �?                �?
+�?             �?  new ◄──�?continue ◄──�?apply ◄──�?archive �?                �?
+�?             �?   �?         �?          �?          �?   �?                �?
+�?             �?   └──────────┴───────────┴───────────�?   �?                �?
+�?             �?             any order                     �?                �?
+�?             └────────────────────────────────────────────�?                �?
+�?                                                                            �?
+�?  �?Create artifacts one at a time OR fast-forward                         �?
+�?  �?Update specs/design/tasks during implementation                        �?
+�?  �?Dependencies enable progress, phases don't exist                       �?
+�?                                                                            �?
+└─────────────────────────────────────────────────────────────────────────────�?
 ```
 
 ### Component Architecture
@@ -364,59 +366,59 @@ Examples in this section use the expanded command set (`new`, `continue`, etc.);
 **Legacy workflow** uses hardcoded templates in TypeScript:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────�?
-�?                     LEGACY WORKFLOW COMPONENTS                              �?
-├─────────────────────────────────────────────────────────────────────────────�?
-�?                                                                            �?
-�?  Hardcoded Templates (TypeScript strings)                                  �?
-�?                   �?                                                       �?
-�?                   �?                                                       �?
-�?  Tool-specific configurators/adapters                                      �?
-�?                   �?                                                       �?
-�?                   �?                                                       �?
-�?  Generated Command Files (.claude/commands/TestSpec/*.md)                  �?
-�?                                                                            �?
-�?  �?Fixed structure, no artifact awareness                                  �?
-�?  �?Change requires code modification + rebuild                             �?
-�?                                                                            �?
-└─────────────────────────────────────────────────────────────────────────────�?
+┌─────────────────────────────────────────────────────────────────────────────�?
+�?                     LEGACY WORKFLOW COMPONENTS                              �?
+├─────────────────────────────────────────────────────────────────────────────�?
+�?                                                                            �?
+�?  Hardcoded Templates (TypeScript strings)                                  �?
+�?                   �?                                                       �?
+�?                   �?                                                       �?
+�?  Tool-specific configurators/adapters                                      �?
+�?                   �?                                                       �?
+�?                   �?                                                       �?
+�?  Generated Command Files (.claude/commands/TestSpec/*.md)                  �?
+�?                                                                            �?
+�?  �?Fixed structure, no artifact awareness                                  �?
+�?  �?Change requires code modification + rebuild                             �?
+�?                                                                            �?
+└─────────────────────────────────────────────────────────────────────────────�?
 ```
 
 **OPSX** uses external schemas and a dependency graph engine:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────�?
-�?                        OPSX COMPONENTS                                      �?
-├─────────────────────────────────────────────────────────────────────────────�?
-�?                                                                            �?
-�?  Schema Definitions (YAML)                                                 �?
-�?  ┌─────────────────────────────────────────────────────────────────────�?  �?
-�?  �? name: spec-driven                                                  �?  �?
-�?  �? artifacts:                                                         �?  �?
-�?  �?   - id: proposal                                                   �?  �?
-�?  �?     generates: proposal.md                                         �?  �?
-�?  �?     requires: []              ◄── Dependencies                     �?  �?
-�?  �?   - id: specs                                                      �?  �?
-�?  �?     generates: specs/**/*.md  ◄── Glob patterns                    �?  �?
-�?  �?     requires: [proposal]      ◄── Enables after proposal           �?  �?
-�?  └─────────────────────────────────────────────────────────────────────�?  �?
-�?                   �?                                                       �?
-�?                   �?                                                       �?
-�?  Artifact Graph Engine                                                     �?
-�?  ┌─────────────────────────────────────────────────────────────────────�?  �?
-�?  �? �?Topological sort (dependency ordering)                           �?  �?
-�?  �? �?State detection (filesystem existence)                           �?  �?
-�?  �? �?Rich instruction generation (templates + context)                �?  �?
-�?  └─────────────────────────────────────────────────────────────────────�?  �?
-�?                   �?                                                       �?
-�?                   �?                                                       �?
-�?  Skill Files (.claude/skills/TestSpec-*/SKILL.md)                          �?
-�?                                                                            �?
-�?  �?Cross-editor compatible (Claude Code, Cursor, Windsurf)                 �?
-�?  �?Skills query CLI for structured data                                    �?
-�?  �?Fully customizable via schema files                                     �?
-�?                                                                            �?
-└─────────────────────────────────────────────────────────────────────────────�?
+┌─────────────────────────────────────────────────────────────────────────────�?
+�?                        OPSX COMPONENTS                                      �?
+├─────────────────────────────────────────────────────────────────────────────�?
+�?                                                                            �?
+�?  Schema Definitions (YAML)                                                 �?
+�?  ┌─────────────────────────────────────────────────────────────────────�?  �?
+�?  �? name: spec-driven                                                  �?  �?
+�?  �? artifacts:                                                         �?  �?
+�?  �?   - id: proposal                                                   �?  �?
+�?  �?     generates: proposal.md                                         �?  �?
+�?  �?     requires: []              ◄── Dependencies                     �?  �?
+�?  �?   - id: specs                                                      �?  �?
+�?  �?     generates: specs/**/*.md  ◄── Glob patterns                    �?  �?
+�?  �?     requires: [proposal]      ◄── Enables after proposal           �?  �?
+�?  └─────────────────────────────────────────────────────────────────────�?  �?
+�?                   �?                                                       �?
+�?                   �?                                                       �?
+�?  Artifact Graph Engine                                                     �?
+�?  ┌─────────────────────────────────────────────────────────────────────�?  �?
+�?  �? �?Topological sort (dependency ordering)                           �?  �?
+�?  �? �?State detection (filesystem existence)                           �?  �?
+�?  �? �?Rich instruction generation (templates + context)                �?  �?
+�?  └─────────────────────────────────────────────────────────────────────�?  �?
+�?                   �?                                                       �?
+�?                   �?                                                       �?
+�?  Skill Files (.claude/skills/TestSpec-*/SKILL.md)                          �?
+�?                                                                            �?
+�?  �?Cross-editor compatible (Claude Code, Cursor, Windsurf)                 �?
+�?  �?Skills query CLI for structured data                                    �?
+�?  �?Fully customizable via schema files                                     �?
+�?                                                                            �?
+└─────────────────────────────────────────────────────────────────────────────�?
 ```
 
 ### Dependency Graph Model
@@ -426,135 +428,135 @@ Artifacts form a directed acyclic graph (DAG). Dependencies are **enablers**, no
 ```
                               proposal
                              (root node)
-                                  �?
-                    ┌─────────────┴─────────────�?
-                    �?                          �?
-                    �?                          �?
+                                  �?
+                    ┌─────────────┴─────────────�?
+                    �?                          �?
+                    �?                          �?
                  specs                       design
               (requires:                  (requires:
                proposal)                   proposal)
-                    �?                          �?
-                    └─────────────┬─────────────�?
-                                  �?
-                                  �?
+                    �?                          �?
+                    └─────────────┬─────────────�?
+                                  �?
+                                  �?
                                tasks
                            (requires:
                            specs, design)
-                                  �?
-                                  �?
-                          ┌──────────────�?
-                          �?APPLY PHASE  �?
-                          �?(requires:   �?
-                          �? tasks)      �?
-                          └──────────────�?
+                                  �?
+                                  �?
+                          ┌──────────────�?
+                          �?APPLY PHASE  �?
+                          �?(requires:   �?
+                          �? tasks)      �?
+                          └──────────────�?
 ```
 
 **State transitions:**
 
 ```
-   BLOCKED ────────────────�?READY ────────────────�?DONE
-      �?                       �?                      �?
+   BLOCKED ────────────────�?READY ────────────────�?DONE
+      �?                       �?                      �?
    Missing                  All deps               File exists
    dependencies             are DONE               on filesystem
 ```
 
 ### Information Flow
 
-**Legacy workflow** �?agent receives static instructions:
+**Legacy workflow** �?agent receives static instructions:
 
 ```
   User: "/TestSpec:proposal"
-           �?
-           �?
-  ┌─────────────────────────────────────────�?
-  �? Static instructions:                   �?
-  �? �?Create proposal.md                   �?
-  �? �?Create tasks.md                      �?
-  �? �?Create design.md                     �?
-  �? �?Create specs/<capability>/spec.md    �?
-  �?                                        �?
-  �? No awareness of what exists or         �?
-  �? dependencies between artifacts         �?
-  └─────────────────────────────────────────�?
-           �?
-           �?
+           �?
+           �?
+  ┌─────────────────────────────────────────�?
+  �? Static instructions:                   �?
+  �? �?Create proposal.md                   �?
+  �? �?Create tasks.md                      �?
+  �? �?Create design.md                     �?
+  �? �?Create specs/<capability>/spec.md    �?
+  �?                                        �?
+  �? No awareness of what exists or         �?
+  �? dependencies between artifacts         �?
+  └─────────────────────────────────────────�?
+           �?
+           �?
   Agent creates ALL artifacts in one go
 ```
 
-**OPSX** �?agent queries for rich context:
+**OPSX** �?agent queries for rich context:
 
 ```
   User: "/testspec:continue"
-           �?
-           �?
-  ┌──────────────────────────────────────────────────────────────────────────�?
-  �? Step 1: Query current state                                             �?
-  �? ┌────────────────────────────────────────────────────────────────────�? �?
-  �? �? $ TestSpec status --change "add-auth" --json                      �? �?
-  �? �?                                                                   �? �?
-  �? �? {                                                                 �? �?
-  �? �?   "artifacts": [                                                  �? �?
-  �? �?     {"id": "proposal", "status": "done"},                         �? �?
-  �? �?     {"id": "specs", "status": "ready"},      ◄── First ready      �? �?
-  �? �?     {"id": "design", "status": "ready"},                          �? �?
-  �? �?     {"id": "tasks", "status": "blocked", "missingDeps": ["specs"]}�? �?
-  �? �?   ]                                                               �? �?
-  �? �? }                                                                 �? �?
-  �? └────────────────────────────────────────────────────────────────────�? �?
-  �?                                                                         �?
-  �? Step 2: Get rich instructions for ready artifact                        �?
-  �? ┌────────────────────────────────────────────────────────────────────�? �?
-  �? �? $ TestSpec instructions specs --change "add-auth" --json          �? �?
-  �? �?                                                                   �? �?
-  �? �? {                                                                 �? �?
-  �? �?   "template": "# Specification\n\n## ADDED Requirements...",      �? �?
-  �? �?   "dependencies": [{"id": "proposal", "path": "...", "done": true}�? �?
-  �? �?   "unlocks": ["tasks"]                                            �? �?
-  �? �? }                                                                 �? �?
-  �? └────────────────────────────────────────────────────────────────────�? �?
-  �?                                                                         �?
-  �? Step 3: Read dependencies �?Create ONE artifact �?Show what's unlocked  �?
-  └──────────────────────────────────────────────────────────────────────────�?
+           �?
+           �?
+  ┌──────────────────────────────────────────────────────────────────────────�?
+  �? Step 1: Query current state                                             �?
+  �? ┌────────────────────────────────────────────────────────────────────�? �?
+  �? �? $ TestSpec status --change "add-auth" --json                      �? �?
+  �? �?                                                                   �? �?
+  �? �? {                                                                 �? �?
+  �? �?   "artifacts": [                                                  �? �?
+  �? �?     {"id": "proposal", "status": "done"},                         �? �?
+  �? �?     {"id": "specs", "status": "ready"},      ◄── First ready      �? �?
+  �? �?     {"id": "design", "status": "ready"},                          �? �?
+  �? �?     {"id": "tasks", "status": "blocked", "missingDeps": ["specs"]}�? �?
+  �? �?   ]                                                               �? �?
+  �? �? }                                                                 �? �?
+  �? └────────────────────────────────────────────────────────────────────�? �?
+  �?                                                                         �?
+  �? Step 2: Get rich instructions for ready artifact                        �?
+  �? ┌────────────────────────────────────────────────────────────────────�? �?
+  �? �? $ TestSpec instructions specs --change "add-auth" --json          �? �?
+  �? �?                                                                   �? �?
+  �? �? {                                                                 �? �?
+  �? �?   "template": "# Specification\n\n## ADDED Requirements...",      �? �?
+  �? �?   "dependencies": [{"id": "proposal", "path": "...", "done": true}�? �?
+  �? �?   "unlocks": ["tasks"]                                            �? �?
+  �? �? }                                                                 �? �?
+  �? └────────────────────────────────────────────────────────────────────�? �?
+  �?                                                                         �?
+  �? Step 3: Read dependencies �?Create ONE artifact �?Show what's unlocked  �?
+  └──────────────────────────────────────────────────────────────────────────�?
 ```
 
 ### Iteration Model
 
-**Legacy workflow** �?awkward to iterate:
+**Legacy workflow** �?awkward to iterate:
 
 ```
-  ┌─────────�?    ┌─────────�?    ┌─────────�?
-  �?proposal�?──�?�?/apply  �?──�?�?archive �?
-  └─────────�?    └─────────�?    └─────────�?
-       �?              �?
-       �?              ├── "Wait, the design is wrong"
-       �?              �?
-       �?              ├── Options:
-       �?              �?  �?Edit files manually (breaks context)
-       �?              �?  �?Abandon and start over
-       �?              �?  �?Push through and fix later
-       �?              �?
-       �?              └── No official "go back" mechanism
-       �?
+  ┌─────────�?    ┌─────────�?    ┌─────────�?
+  �?proposal�?──�?�?/apply  �?──�?�?archive �?
+  └─────────�?    └─────────�?    └─────────�?
+       �?              �?
+       �?              ├── "Wait, the design is wrong"
+       �?              �?
+       �?              ├── Options:
+       �?              �?  �?Edit files manually (breaks context)
+       �?              �?  �?Abandon and start over
+       �?              �?  �?Push through and fix later
+       �?              �?
+       �?              └── No official "go back" mechanism
+       �?
        └── Creates ALL artifacts at once
 ```
 
-**OPSX** �?natural iteration:
+**OPSX** �?natural iteration:
 
 ```
-  /testspec:new ───�?/testspec:continue ───�?/testspec:apply ───�?/testspec:archive
-      �?               �?                 �?
-      �?               �?                 ├── "The design is wrong"
-      �?               �?                 �?
-      �?               �?                 �?
-      �?               �?           Just edit design.md
-      �?               �?           and continue!
-      �?               �?                 �?
-      �?               �?                 �?
-      �?               �?        /testspec:apply picks up
-      �?               �?        where you left off
-      �?               �?
-      �?               └── Creates ONE artifact, shows what's unlocked
-      �?
+  /testspec:new ───�?/testspec:continue ───�?/testspec:apply ───�?/testspec:archive
+      �?               �?                 �?
+      �?               �?                 ├── "The design is wrong"
+      �?               �?                 �?
+      �?               �?                 �?
+      �?               �?           Just edit design.md
+      �?               �?           and continue!
+      �?               �?                 �?
+      �?               �?                 �?
+      �?               �?        /testspec:apply picks up
+      �?               �?        where you left off
+      �?               �?
+      �?               └── Creates ONE artifact, shows what's unlocked
+      �?
       └── Scaffolds change, waits for direction
 ```
 
@@ -607,7 +609,7 @@ artifacts:
 
 **Dependency Graph:**
 ```
-   research ──�?proposal ──�?tasks
+   research ──�?proposal ──�?tasks
 ```
 
 ### Summary
@@ -625,7 +627,7 @@ artifacts:
 
 Schemas define what artifacts exist and their dependencies. Currently available:
 
-- **spec-driven** (default): proposal �?specs �?design �?tasks
+- **spec-driven** (default): proposal �?specs �?design �?tasks
 
 ```bash
 # List available schemas
@@ -648,12 +650,12 @@ TestSpec schema validate my-workflow
 
 - Use `/testspec:explore` to think through an idea before committing to a change
 - `/testspec:ff` when you know what you want, `/testspec:continue` when exploring
-- During `/testspec:apply`, if something's wrong �?fix the artifact, then continue
+- During `/testspec:apply`, if something's wrong �?fix the artifact, then continue
 - Tasks track progress via checkboxes in `tasks.md`
 - Check status anytime: `TestSpec status --change "name"`
 
 ## Feedback
 
-This is rough. That's intentional �?we're learning what works.
+This is rough. That's intentional �?we're learning what works.
 
 Found a bug? Have ideas? Join us on [Discord](https://discord.gg/YctCnvvshC) or open an issue on [GitHub](https://github.com/Pluto-AI-Workbench/TestSpec/issues).
