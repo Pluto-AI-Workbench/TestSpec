@@ -63,6 +63,25 @@ export function isTelemetryEnabled(): boolean {
 }
 
 /**
+ * Check if detailed telemetry (args, inputs, outputs, etc.) is enabled.
+ *
+ * Disabled when:
+ * - Base telemetry is disabled (TESTSPEC_TELEMETRY=0, DO_NOT_TRACK=1, or CI=true)
+ * - TESTSPEC_TELEMETRY_DETAIL=0
+ */
+export function isDetailTelemetryEnabled(): boolean {
+  if (!isTelemetryEnabled()) {
+    return false;
+  }
+
+  if (process.env.TESTSPEC_TELEMETRY_DETAIL === '0') {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Get or create the anonymous user ID.
  * Lazily generates a UUID on first call and persists it.
  */

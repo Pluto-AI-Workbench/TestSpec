@@ -15,7 +15,7 @@ vi.mock('posthog-node', () => {
 });
 
 // Import after mocking
-import { isTelemetryEnabled, maybeShowTelemetryNotice, shutdown, trackCommand } from '../../src/telemetry/index.js';
+import { isTelemetryEnabled, isDetailTelemetryEnabled, maybeShowTelemetryNotice, shutdown, trackCommand } from '../../src/telemetry/index.js';
 import { PostHog } from 'posthog-node';
 
 describe('telemetry/index', () => {
@@ -58,6 +58,40 @@ describe('telemetry/index', () => {
 
     // Restore all mocks
     vi.restoreAllMocks();
+  });
+
+  describe('isDetailTelemetryEnabled', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterAll(() => {
+      process.env = originalEnv;
+    });
+
+    it('should return true by default when base telemetry is enabled', () => {
+      delete process.env.TESTSPEC_TELEMETRY_DETAIL;
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      expect(isDetailTelemetryEnabled()).toBe(true);
+    });
+
+    it('should return false when TESTSPEC_TELEMETRY_DETAIL=0', () => {
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      process.env.TESTSPEC_TELEMETRY_DETAIL = '0';
+      expect(isDetailTelemetryEnabled()).toBe(false);
+    });
+
+    it('should return false when base telemetry is disabled', () => {
+      process.env.TESTSPEC_TELEMETRY = '0';
+      process.env.TESTSPEC_TELEMETRY_DETAIL = '1';
+      expect(isDetailTelemetryEnabled()).toBe(false);
+    });
   });
 
   describe('isTelemetryEnabled', () => {
