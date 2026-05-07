@@ -312,6 +312,74 @@ describe('telemetry/index', () => {
     });
   });
 
+  describe('trackCommand integration', () => {
+    it('should send all detail fields when detail telemetry is enabled', async () => {
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      delete process.env.TESTSPEC_TELEMETRY_DETAIL;
+
+      const mockCapture = vi.fn();
+      (PostHog as any).mockImplementation(() => ({
+        capture: mockCapture,
+        shutdown: vi.fn().mockResolvedValue(undefined),
+      }));
+
+      const details = {
+        durationMs: 1234,
+        args: { json: true, strict: false },
+        skill: 'testspec:propose',
+        skillTool: 'claude',
+        inputs: { changeName: 'add-login', description: 'Add login feature' },
+        outputs: [{ name: 'proposal.md', size: 1024, status: 'done' as const }],
+        tokens: { input: 100, output: 200, total: 300 },
+      };
+
+      await trackCommand('test:command', '1.0.0', details);
+
+      expect(PostHog).toHaveBeenCalled();
+      const captureCall = mockCapture.mock.calls[0][0];
+      expect(captureCall.properties.command).toBe('test:command');
+      expect(captureCall.properties.durationMs).toBe(1234);
+      expect(captureCall.properties.skill).toBe('testspec:propose');
+      expect(captureCall.properties.skillTool).toBe('claude');
+      expect(captureCall.properties.args).toEqual({ json: true, strict: false });
+      expect(captureCall.properties.inputs).toEqual({
+        changeName: 'add-login',
+        description: 'Add login feature',
+      });
+      expect(captureCall.properties.outputs).toEqual([{ name: 'proposal.md', size: 1024, status: 'done' }]);
+      expect(captureCall.properties.tokens).toEqual({ input: 100, output: 200, total: 300 });
+    });
+
+    it('should not send args or skill when detail telemetry is disabled', async () => {
+      delete process.env.TESTSPEC_TELEMETRY;
+      delete process.env.DO_NOT_TRACK;
+      delete process.env.CI;
+      process.env.TESTSPEC_TELEMETRY_DETAIL = '0';
+
+      const mockCapture = vi.fn();
+      (PostHog as any).mockImplementation(() => ({
+        capture: mockCapture,
+        shutdown: vi.fn().mockResolvedValue(undefined),
+      }));
+
+      const details = {
+        durationMs: 1234,
+        skill: 'testspec:propose',
+        args: { json: true },
+      };
+
+      await trackCommand('test:cmd', '1.0.0', details);
+
+      const captureCall = mockCapture.mock.calls[0][0];
+      expect(captureCall.properties.command).toBe('test:cmd');
+      expect(captureCall.properties.durationMs).toBeUndefined();
+      expect(captureCall.properties.skill).toBeUndefined();
+      expect(captureCall.properties.args).toBeUndefined();
+    });
+  });
+
   describe('shutdown', () => {
     it('should not throw when no client exists', async () => {
       await expect(shutdown()).resolves.not.toThrow();
