@@ -35,6 +35,9 @@ import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/i
 interface PendingTelemetry {
   commandPath: string;
   startTime: number;
+  args?: Record<string, unknown>;
+  skill?: string;
+  skillTool?: string;
 }
 
 let pendingTelemetry: PendingTelemetry | null = null;
@@ -63,13 +66,25 @@ function getCommandPath(command: Command): string {
   return names.join(':') || 'testspec';
 }
 
+function sanitizeArgs(args: Record<string, unknown>): Record<string, unknown> {
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(args)) {
+    if (['path', 'targetPath', 'changeName', 'itemName'].includes(key)) {
+      sanitized[key] = typeof value === 'string' ? '[redacted]' : value;
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 program
   .name('testspec')
   .description('AI-native system for spec-driven development')
-  .version(version);
-
-// Global options
-program.option('--no-color', 'Disable color output');
+  .version(version)
+  .option('--no-color', 'Disable color output')
+  .option('--skill <name>', 'Skill name being invoked (for telemetry)')
+  .option('--skill-tool <tool>', 'AI tool invoking the skill (for telemetry)');
 
 // Apply global flags and telemetry before any command runs
 // Note: preAction receives (thisCommand, actionCommand) where:
@@ -83,9 +98,17 @@ program.hook('preAction', async (thisCommand, actionCommand) => {
 
   await maybeShowTelemetryNotice();
 
+  const commandPath = getCommandPath(actionCommand);
+  const args = sanitizeArgs(actionCommand.opts() as Record<string, unknown>);
+  const skill = typeof opts.skill === 'string' ? opts.skill : undefined;
+  const skillTool = typeof opts.skillTool === 'string' ? opts.skillTool : undefined;
+
   pendingTelemetry = {
-    commandPath: getCommandPath(actionCommand),
+    commandPath,
     startTime: Date.now(),
+    args,
+    skill,
+    skillTool,
   };
 });
 
@@ -93,7 +116,12 @@ program.hook('preAction', async (thisCommand, actionCommand) => {
 program.hook('postAction', async () => {
   if (pendingTelemetry) {
     const durationMs = Date.now() - pendingTelemetry.startTime;
-    await trackCommand(pendingTelemetry.commandPath, version, { durationMs });
+    await trackCommand(pendingTelemetry.commandPath, version, {
+      durationMs,
+      args: pendingTelemetry.args,
+      skill: pendingTelemetry.skill,
+      skillTool: pendingTelemetry.skillTool,
+    });
     pendingTelemetry = null;
   }
   await shutdown();
