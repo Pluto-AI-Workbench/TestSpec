@@ -37,4 +37,5 @@ end
 function __fish_testspec_items
     __fish_testspec_changes
     __fish_testspec_specs
+
 end`;

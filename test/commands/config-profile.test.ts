@@ -89,6 +89,7 @@ describe('config profile interactive flow', () => {
       'testspec-sdt-build',
       'testspec-sdt-design',
       'testspec-sdt-clarify',
+
     ];
     for (const dirName of sdtSkillDirs) {
       const skillPath = path.join(projectDir, '.claude', 'skills', dirName, 'SKILL.md');

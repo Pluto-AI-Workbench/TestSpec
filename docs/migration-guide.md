@@ -24,10 +24,10 @@ OPSX replaces the old phase-locked workflow with a fluid, action-based approach.
 
 The migration process is designed with preservation in mind:
 
-- **Active changes in `TestSpec/changes/`** �?Completely preserved. You can continue them with OPSX commands.
-- **Archived changes** �?Untouched. Your history remains intact.
-- **Main specs in `TestSpec/specs/`** �?Untouched. These are your source of truth.
-- **Your content in CLAUDE.md, AGENTS.md, etc.** �?Preserved. Only the TestSpec marker blocks are removed; everything you wrote stays.
+- **Active changes in `TestSpec/changes/`** �?Completely preserved. You can continue them with OPSX commands.
+- **Archived changes** �?Untouched. Your history remains intact.
+- **Main specs in `TestSpec/specs/`** �?Untouched. These are your source of truth.
+- **Your content in CLAUDE.md, AGENTS.md, etc.** �?Preserved. Only the TestSpec marker blocks are removed; everything you wrote stays.
 
 ### What Gets Removed
 
@@ -57,7 +57,7 @@ The removal list may seem long, but these are all files that TestSpec originally
 
 One file requires manual migration:
 
-**`TestSpec/project.md`** �?This file isn't deleted automatically because it may contain project context you've written. You'll need to:
+**`TestSpec/project.md`** �?This file isn't deleted automatically because it may contain project context you've written. You'll need to:
 
 1. Review its contents
 2. Move useful context to `TestSpec/config.yaml` (see guidance below)
@@ -84,7 +84,7 @@ Don't worry about getting it perfect. We're still learning what works best here,
 
 Both `TestSpec init` and `TestSpec update` detect legacy files and guide you through the same cleanup process. Use whichever fits your situation:
 
-- New installs default to profile `core` (`propose`, `explore`, `apply`, `archive`).
+- New installs default to profile `core` (`propose`, `explore`, `apply`, `sync`, `archive`).
 - Migrated installs preserve your previously installed workflows by writing a `custom` profile when needed.
 
 ### Using `TestSpec init`
@@ -106,16 +106,16 @@ as before.
 
 Files to remove
 No user content to preserve:
-  �?.claude/commands/TestSpec/
-  �?TestSpec/AGENTS.md
+  �?.claude/commands/TestSpec/
+  �?TestSpec/AGENTS.md
 
 Files to update
 TestSpec markers will be removed, your content preserved:
-  �?CLAUDE.md
-  �?AGENTS.md
+  �?CLAUDE.md
+  �?AGENTS.md
 
 Needs your attention
-  �?TestSpec/project.md
+  �?TestSpec/project.md
     We won't delete this file. It may contain useful project context.
 
     The new TestSpec/config.yaml has a "context:" section for planning
@@ -160,7 +160,7 @@ The `--force` flag skips prompts and auto-accepts cleanup.
 
 ## Migrating project.md to config.yaml
 
-The old `TestSpec/project.md` was a freeform markdown file for project context. The new `TestSpec/config.yaml` is structured and—critically�?*injected into every planning request** so your conventions are always present when the AI works.
+The old `TestSpec/project.md` was a freeform markdown file for project context. The new `TestSpec/config.yaml` is structured and—critically�?*injected into every planning request** so your conventions are always present when the AI works.
 
 ### Before (project.md)
 
@@ -301,6 +301,7 @@ Command availability is profile-dependent:
 | `/testspec:bulk-archive` | Archive multiple changes at once |
 | `/testspec:onboard` | Guided end-to-end onboarding workflow |
 
+
 Enable expanded commands with `TestSpec config profile`, then run `TestSpec update`.
 
 ### Command Mapping from Legacy
@@ -336,10 +337,10 @@ Think through ideas with a partner before committing to a change.
 The legacy workflow forced linear progression:
 
 ```
-┌──────────────�?     ┌──────────────�?     ┌──────────────�?
-�?  PLANNING   �?───�?�?IMPLEMENTING �?───�?�?  ARCHIVING  �?
-�?   PHASE     �?     �?   PHASE     �?     �?   PHASE     �?
-└──────────────�?     └──────────────�?     └──────────────�?
+┌──────────────�?     ┌──────────────�?     ┌──────────────�?
+�?  PLANNING   �?───�?�?IMPLEMENTING �?───�?�?  ARCHIVING  �?
+�?   PHASE     �?     �?   PHASE     �?     �?   PHASE     �?
+└──────────────�?     └──────────────�?     └──────────────�?
 
 If you're in implementation and realize the design is wrong?
 Too bad. Phase gates don't let you go back easily.
@@ -348,14 +349,14 @@ Too bad. Phase gates don't let you go back easily.
 OPSX uses actions, not phases:
 
 ```
-         ┌───────────────────────────────────────────────�?
-         �?          ACTIONS (not phases)                �?
-         �?                                              �?
-         �?    new ◄──�?continue ◄──�?apply ◄──�?archive �?
-         �?     �?         �?          �?            �?  �?
-         �?     └──────────┴───────────┴─────────────�?  �?
-         �?                   any order                  �?
-         └───────────────────────────────────────────────�?
+         ┌───────────────────────────────────────────────�?
+         �?          ACTIONS (not phases)                �?
+         �?                                              �?
+         �?    new ◄──�?continue ◄──�?apply ◄──�?archive �?
+         �?     �?         �?          �?            �?  �?
+         �?     └──────────┴───────────┴─────────────�?  �?
+         �?                   any order                  �?
+         └───────────────────────────────────────────────�?
 ```
 
 ### Dependency Graph
@@ -365,17 +366,17 @@ Artifacts form a directed graph. Dependencies are enablers, not gates:
 ```
                         proposal
                        (root node)
-                            �?
-              ┌─────────────┴─────────────�?
-              �?                          �?
-              �?                          �?
+                            �?
+              ┌─────────────┴─────────────�?
+              �?                          �?
+              �?                          �?
            specs                       design
         (requires:                  (requires:
          proposal)                   proposal)
-              �?                          �?
-              └─────────────┬─────────────�?
-                            �?
-                            �?
+              �?                          �?
+              └─────────────┬─────────────�?
+                            �?
+                            �?
                          tasks
                      (requires:
                      specs, design)
@@ -477,7 +478,7 @@ When determining which schema to use, OPSX checks in order:
 
 | Schema | Artifacts | Best For |
 |--------|-----------|----------|
-| `spec-driven` | proposal �?specs �?design �?tasks | Most projects |
+| `spec-driven` | proposal �?specs �?design �?tasks | Most projects |
 
 List all available schemas:
 
@@ -552,25 +553,25 @@ Run init and decline the cleanup prompt—you'll see the full detection summary 
 ```
 project/
 ├── TestSpec/
-�?  ├── specs/                    # Unchanged
-�?  ├── changes/                  # Unchanged
-�?  �?  └── archive/              # Unchanged
-�?  └── config.yaml               # NEW: Project configuration
+�?  ├── specs/                    # Unchanged
+�?  ├── changes/                  # Unchanged
+�?  �?  └── archive/              # Unchanged
+�?  └── config.yaml               # NEW: Project configuration
 ├── .claude/
-�?  └── skills/                   # NEW: OPSX skills
-�?      ├── TestSpec-propose/     # default core profile
-�?      ├── TestSpec-explore/
-�?      ├── TestSpec-apply-change/
-�?      └── ...                   # expanded profile adds new/continue/ff/etc.
+�?  └── skills/                   # NEW: OPSX skills
+�?      ├── TestSpec-propose/     # default core profile
+�?      ├── TestSpec-explore/
+�?      ├── TestSpec-apply-change/
+�?      └── ...                   # expanded profile adds new/continue/ff/etc.
 ├── CLAUDE.md                     # TestSpec markers removed, your content preserved
 └── AGENTS.md                     # TestSpec markers removed, your content preserved
 ```
 
 ### What's Gone
 
-- `.claude/commands/TestSpec/` �?replaced by `.claude/skills/`
-- `TestSpec/AGENTS.md` �?obsolete
-- `TestSpec/project.md` �?migrate to `config.yaml`, then delete
+- `.claude/commands/TestSpec/` �?replaced by `.claude/skills/`
+- `TestSpec/AGENTS.md` �?obsolete
+- `TestSpec/project.md` �?migrate to `config.yaml`, then delete
 - TestSpec marker blocks in `CLAUDE.md`, `AGENTS.md`, etc.
 
 ### Command Cheatsheet

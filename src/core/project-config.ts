@@ -38,6 +38,12 @@ export const ProjectConfigSchema = z.object({
     )
     .optional()
     .describe('Per-artifact rules, keyed by artifact ID'),
+
+  // Optional: custom profile mappings (profile name -> workflow list)
+  profiles: z
+    .record(z.string(), z.array(z.string()))
+    .optional()
+    .describe('Custom profile name to workflow list mappings'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -149,6 +155,35 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
         }
       } else {
         console.warn(`Invalid 'rules' field in config (must be object)`);
+      }
+    }
+
+    // Parse profiles field (profile name -> workflow list)
+    if (raw.profiles !== undefined) {
+      const profilesField = z.record(z.string(), z.array(z.string()));
+
+      if (typeof raw.profiles === 'object' && raw.profiles !== null && !Array.isArray(raw.profiles)) {
+        const parsedProfiles: Record<string, string[]> = {};
+        let hasValidProfiles = false;
+
+        for (const [profileName, workflows] of Object.entries(raw.profiles)) {
+          const workflowsArrayResult = z.array(z.string()).safeParse(workflows);
+
+          if (workflowsArrayResult.success) {
+            parsedProfiles[profileName] = workflowsArrayResult.data;
+            hasValidProfiles = true;
+          } else {
+            console.warn(
+              `Invalid workflows for profile '${profileName}' (must be array of strings), ignoring`
+            );
+          }
+        }
+
+        if (hasValidProfiles) {
+          config.profiles = parsedProfiles;
+        }
+      } else {
+        console.warn(`Invalid 'profiles' field in config (must be object)`);
       }
     }
 

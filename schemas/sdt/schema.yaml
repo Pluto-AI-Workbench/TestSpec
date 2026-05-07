@@ -21,6 +21,7 @@ artifacts:
       文档风格偏向人类可读，以清晰的段落和列表形式呈现，
       便于与利益相关者进行需求确认和评审。
     requires: []
+    checks: []
 
   - id: clarify-sdt-spec
     generates: "sdt-spec.md"
@@ -78,7 +79,7 @@ artifacts:
       - 对前面的 clarify 阶段工件没有依赖
       - 对后面的 design/build 阶段不产生强制影响
       - 作为参考信息辅助决策
-    requires: 
+    requires:
       - clarify-sdt-spec
 
   - id: design-test-points

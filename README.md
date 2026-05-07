@@ -98,6 +98,7 @@ Now tell your AI: `/testspec:propose <what-you-want-to-build>`
 
 If you want the expanded workflow (`/testspec:new`, `/testspec:continue`, `/testspec:ff`, `/testspec:verify`, `/testspec:sync`, `/testspec:bulk-archive`, `/testspec:onboard`), select it with `TestSpec config profile` and apply with `TestSpec update`.
 
+
 > [!NOTE]
 > Not sure if your tool is supported? [View the full list](docs/supported-tools.md) → we support 25+ tools and growing.
 >
@@ -116,7 +117,11 @@ If you want the expanded workflow (`/testspec:new`, `/testspec:continue`, `/test
 
 ## Why TestSpec?
 
-AI coding assistants are powerful but unpredictable when requirements live only in chat history. TestSpec adds a lightweight spec layer so you agree on what to build before any code is written.
+## Community schemas
+
+Third-party schema bundles distributed via standalone repositories — these provide opinionated workflows that integrate OpenSpec with other tools, similar to how [github/spec-kit's community extension catalog](https://github.com/github/spec-kit/tree/main/extensions) handles tool integrations.
+
+→ **[Browse the catalog](docs/customization.md#community-schemas)** in the customization docs.
 
 - **Agree before you build** → human and AI align on specs before code gets written
 - **Stay organized** → each change gets its own folder with proposal, specs, design, and tasks

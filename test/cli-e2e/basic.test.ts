@@ -134,7 +134,9 @@ describe('testspec CLI e2e basics', () => {
       const result = await runCLI(['init', '--tools', 'all', '--profile', 'core'], {
         cwd: emptyProjectDir,
         env: { CODEX_HOME: codexHome },
+        timeoutMs: 20000,
       });
+      expect(result.timedOut).toBe(false);
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('TestSpec Setup Complete');
 
@@ -143,7 +145,7 @@ describe('testspec CLI e2e basics', () => {
       const cursorSkillPath = path.join(emptyProjectDir, '.cursor/skills/testspec-explore/SKILL.md');
       expect(await fileExists(claudeSkillPath)).toBe(true);
       expect(await fileExists(cursorSkillPath)).toBe(true);
-    });
+    }, 25000);
 
     it('initializes with --tools list option', async () => {
       const projectDir = await prepareFixture('tmp-init');

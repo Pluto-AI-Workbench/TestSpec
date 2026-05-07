@@ -76,7 +76,6 @@ describe('InitCommand', () => {
     it('should create sdt profile skills for Claude Code by default', async () => {
       const initCommand = new InitCommand({ tools: 'claude', force: true });
       await initCommand.execute(testDir);
-
       const sdtSkillNames = [
         'testspec-sdt-new',
         'testspec-sdt-build',
@@ -107,7 +106,6 @@ describe('InitCommand', () => {
     it('should create sdt profile commands for Claude Code by default', async () => {
       const initCommand = new InitCommand({ tools: 'claude', force: true });
       await initCommand.execute(testDir);
-
       const sdtCommandNames = [
         'sdt-new.md',
         'sdt-build.md',
@@ -119,7 +117,6 @@ describe('InitCommand', () => {
         const cmdFile = path.join(testDir, '.claude', 'commands', 'testspec', cmdName);
         expect(await fileExists(cmdFile)).toBe(true);
       }
-
       const nonSdtCommandNames = [
         'propose.md',
         'explore.md',
@@ -153,6 +150,30 @@ describe('InitCommand', () => {
 
       const skillFile = path.join(testDir, '.windsurf', 'skills', 'testspec-sdt-new', 'SKILL.md');
       expect(await fileExists(skillFile)).toBe(true);
+    });
+
+    it('should support Kimi CLI as an adapterless skills-only tool', async () => {
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+      });
+
+      const initCommand = new InitCommand({ tools: 'kimi', force: true });
+      await initCommand.execute(testDir);
+
+      const skillFile = path.join(testDir, '.kimi', 'skills', 'openspec-explore', 'SKILL.md');
+      expect(await fileExists(skillFile)).toBe(true);
+
+      const commandsDir = path.join(testDir, '.kimi', 'commands');
+      expect(await directoryExists(commandsDir)).toBe(false);
+
+      const logCalls = (console.log as unknown as { mock: { calls: unknown[][] } }).mock.calls.flat().map(String);
+      expect(
+        logCalls.some(
+          (entry) => entry.includes('Commands skipped for: kimi') && entry.includes('(no adapter)'),
+        ),
+      ).toBe(true);
     });
 
     it('should create skills for multiple tools at once', async () => {

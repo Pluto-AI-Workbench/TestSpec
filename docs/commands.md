@@ -27,6 +27,7 @@ For workflow patterns and when to use each command, see [Workflows](workflows.md
 | `/testspec:bulk-archive` | Archive multiple changes at once |
 | `/testspec:onboard` | Guided tutorial through the complete workflow |
 
+
 The default global profile is `core`. To enable expanded workflow commands, run `TestSpec config profile`, select workflows, then run `TestSpec update` in your project.
 
 ---
@@ -57,10 +58,10 @@ Create a new change and generate planning artifacts in one step. This is the def
 You: /testspec:propose add-dark-mode
 
 AI:  Created TestSpec/changes/add-dark-mode/
-     âœ?proposal.md
-     âœ?specs/ui/spec.md
-     âœ?design.md
-     âœ?tasks.md
+     ï¿½?proposal.md
+     ï¿½?specs/ui/spec.md
+     ï¿½?design.md
+     ï¿½?tasks.md
      Ready for implementation. Run /testspec:apply.
 ```
 
@@ -199,16 +200,16 @@ You: /testspec:continue
 AI:  Change: add-dark-mode
 
      Artifact status:
-     âœ?proposal    (done)
-     â—?specs       (ready)
-     â—?design      (ready)
-     â—?tasks       (blocked - needs: specs)
+     ï¿½?proposal    (done)
+     ï¿½?specs       (ready)
+     ï¿½?design      (ready)
+     ï¿½?tasks       (blocked - needs: specs)
 
      Creating specs...
 
      [Reads proposal.md, creates specs based on requirements]
 
-     âœ?Created TestSpec/changes/add-dark-mode/specs/ui/spec.md
+     ï¿½?Created TestSpec/changes/add-dark-mode/specs/ui/spec.md
 
      Now available: tasks
      Run /testspec:continue to create the next artifact.
@@ -248,10 +249,10 @@ You: /testspec:ff add-dark-mode
 
 AI:  Fast-forwarding add-dark-mode...
 
-     âœ?Creating proposal.md
-     âœ?Creating specs/ui/spec.md
-     âœ?Creating design.md
-     âœ?Creating tasks.md
+     ï¿½?Creating proposal.md
+     ï¿½?Creating specs/ui/spec.md
+     ï¿½?Creating design.md
+     ï¿½?Creating tasks.md
 
      All planning artifacts complete!
      Ready for implementation. Run /testspec:apply to begin.
@@ -299,12 +300,12 @@ AI:  Implementing add-dark-mode...
      Working on 1.1: Create ThemeContext...
      [Creates src/context/ThemeContext.tsx]
 
-     âœ?1.1 Complete
+     ï¿½?1.1 Complete
 
      Working on 1.2: Add CSS custom properties...
      [Updates src/styles/globals.css]
 
-     âœ?1.2 Complete
+     ï¿½?1.2 Complete
      ...
 ```
 
@@ -350,19 +351,19 @@ You: /testspec:verify
 AI:  Verifying add-dark-mode...
 
      COMPLETENESS
-     âœ?All 8 tasks in tasks.md are checked
-     âœ?All requirements in specs have corresponding code
-     âš?Scenario "System preference detection" has no test coverage
+     ï¿½?All 8 tasks in tasks.md are checked
+     ï¿½?All requirements in specs have corresponding code
+     ï¿½?Scenario "System preference detection" has no test coverage
 
      CORRECTNESS
-     âœ?Implementation matches spec intent
-     âœ?Edge cases from scenarios are handled
-     âœ?Error states match spec definitions
+     ï¿½?Implementation matches spec intent
+     ï¿½?Edge cases from scenarios are handled
+     ï¿½?Error states match spec definitions
 
      COHERENCE
-     âœ?Design decisions reflected in code structure
-     âœ?Naming conventions consistent with design.md
-     âš?Design mentions "CSS variables" but implementation uses Tailwind classes
+     ï¿½?Design decisions reflected in code structure
+     ï¿½?Naming conventions consistent with design.md
+     ï¿½?Design mentions "CSS variables" but implementation uses Tailwind classes
 
      SUMMARY
      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -414,11 +415,11 @@ AI:  Syncing add-dark-mode delta specs...
      Target:  TestSpec/specs/ui/spec.md
 
      Changes to apply:
-     âœ?ADDED: Theme Selection requirement (2 scenarios)
-     âœ?ADDED: Accessibility requirement (1 scenario)
+     ï¿½?ADDED: Theme Selection requirement (2 scenarios)
+     ï¿½?ADDED: Accessibility requirement (1 scenario)
 
      Merging...
-     âœ?TestSpec/specs/ui/spec.md updated
+     ï¿½?TestSpec/specs/ui/spec.md updated
 
      Change remains active. Run /testspec:archive when ready to complete.
 ```
@@ -468,18 +469,18 @@ You: /testspec:archive
 AI:  Archiving add-dark-mode...
 
      Artifact status:
-     âœ?proposal.md exists
-     âœ?specs/ exists
-     âœ?design.md exists
-     âœ?tasks.md exists (8/8 tasks complete)
+     ï¿½?proposal.md exists
+     ï¿½?specs/ exists
+     ï¿½?design.md exists
+     ï¿½?tasks.md exists (8/8 tasks complete)
 
      Delta specs: Not yet synced
-     â†?Sync now? (recommended)
+     ï¿½?Sync now? (recommended)
 
 You: Yes
 
-AI:  âœ?Synced specs to TestSpec/specs/ui/spec.md
-     âœ?Moved to TestSpec/changes/archive/2025-01-24-add-dark-mode/
+AI:  ï¿½?Synced specs to TestSpec/specs/ui/spec.md
+     ï¿½?Moved to TestSpec/changes/archive/2025-01-24-add-dark-mode/
 
      Change archived successfully.
 ```
@@ -523,7 +524,7 @@ AI:  Found 3 completed changes:
      - update-footer (2/2 tasks complete)
 
      Checking for spec conflicts...
-     âš?add-dark-mode and update-footer both touch specs/ui/
+     ï¿½?add-dark-mode and update-footer both touch specs/ui/
 
      Inspecting codebase to resolve...
      Both changes are implemented. Will merge in chronological order:
@@ -534,10 +535,10 @@ AI:  Found 3 completed changes:
 
 You: Yes
 
-AI:  âœ?Archived add-dark-mode
-     âœ?Archived fix-login-bug
-     âœ?Archived update-footer
-     Specs merged: add-dark-mode â†?update-footer
+AI:  ï¿½?Archived add-dark-mode
+     ï¿½?Archived fix-login-bug
+     ï¿½?Archived update-footer
+     Specs merged: add-dark-mode ï¿½?update-footer
 ```
 
 **Tips:**
@@ -622,7 +623,7 @@ Different AI tools use slightly different command syntax. Use the format that ma
 
 The intent is the same across tools, but how commands are surfaced can differ by integration.
 
-> **Note:** GitHub Copilot commands (`.github/prompts/*.prompt.md`) are only available in IDE extensions (VS Code, JetBrains, Visual Studio). GitHub Copilot CLI does not currently support custom prompt files â€?see [Supported Tools](supported-tools.md) for details and workarounds.
+> **Note:** GitHub Copilot commands (`.github/prompts/*.prompt.md`) are only available in IDE extensions (VS Code, JetBrains, Visual Studio). GitHub Copilot CLI does not currently support custom prompt files ï¿½?see [Supported Tools](supported-tools.md) for details and workarounds.
 
 ---
 

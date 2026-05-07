@@ -1,14 +1,14 @@
-import { Command } from 'commander';
-import { spawn, execSync } from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { Command } from "commander";
+import { spawn, execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import {
   getGlobalConfigPath,
   getGlobalConfig,
   saveGlobalConfig,
   GlobalConfig,
-} from '../core/global-config.js';
-import type { Profile, Delivery } from '../core/global-config.js';
+} from "../core/global-config.js";
+import type { Profile, Delivery } from "../core/global-config.js";
 import {
   getNestedValue,
   setNestedValue,
@@ -18,12 +18,19 @@ import {
   validateConfigKeyPath,
   validateConfig,
   DEFAULT_CONFIG,
-} from '../core/config-schema.js';
-import { CORE_WORKFLOWS, SDT_WORKFLOWS, ALL_WORKFLOWS, getProfileWorkflows } from '../core/profiles.js';
-import { TESTSPEC_DIR_NAME } from '../core/config.js';
-import { hasProjectConfigDrift } from '../core/profile-sync-drift.js';
+} from "../core/config-schema.js";
+import {
+  CORE_WORKFLOWS,
+  SDT_WORKFLOWS,
+  ALL_WORKFLOWS,
+  getProfileWorkflows,
+  BUILTIN_PROFILES,
+  getConfigProfileNames,
+} from "../core/profiles.js";
+import { TESTSPEC_DIR_NAME } from "../core/config.js";
+import { hasProjectConfigDrift } from "../core/profile-sync-drift.js";
 
-type ProfileAction = 'both' | 'delivery' | 'workflows' | 'keep';
+type ProfileAction = "both" | "delivery" | "workflows" | "keep";
 
 interface ProfileState {
   profile: Profile;
@@ -43,55 +50,56 @@ interface WorkflowPromptMeta {
 
 const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
   propose: {
-    name: 'Propose change',
-    description: 'Create proposal, design, and tasks from a request',
+    name: "Propose change",
+    description: "Create proposal, design, and tasks from a request",
   },
   explore: {
-    name: 'Explore ideas',
-    description: 'Investigate a problem before implementation',
+    name: "Explore ideas",
+    description: "Investigate a problem before implementation",
   },
   new: {
-    name: 'New change',
-    description: 'Create a new change scaffold quickly',
+    name: "New change",
+    description: "Create a new change scaffold quickly",
   },
   continue: {
-    name: 'Continue change',
-    description: 'Resume work on an existing change',
+    name: "Continue change",
+    description: "Resume work on an existing change",
   },
   apply: {
-    name: 'Apply tasks',
-    description: 'Implement tasks from the current change',
+    name: "Apply tasks",
+    description: "Implement tasks from the current change",
   },
   ff: {
-    name: 'Fast-forward',
-    description: 'Run a faster implementation workflow',
+    name: "Fast-forward",
+    description: "Run a faster implementation workflow",
   },
   sync: {
-    name: 'Sync specs',
-    description: 'Sync change artifacts with specs',
+    name: "Sync specs",
+    description: "Sync change artifacts with specs",
   },
   archive: {
-    name: 'Archive change',
-    description: 'Finalize and archive a completed change',
+    name: "Archive change",
+    description: "Finalize and archive a completed change",
   },
-  'bulk-archive': {
-    name: 'Bulk archive',
-    description: 'Archive multiple completed changes together',
+  "bulk-archive": {
+    name: "Bulk archive",
+    description: "Archive multiple completed changes together",
   },
   verify: {
-    name: 'Verify change',
-    description: 'Run verification checks against a change',
+    name: "Verify change",
+    description: "Run verification checks against a change",
   },
   onboard: {
-    name: 'Onboard',
-    description: 'Guided onboarding flow for TestSpec',
+    name: "Onboard",
+    description: "Guided onboarding flow for TestSpec",
   },
 };
 
 function isPromptCancellationError(error: unknown): boolean {
   return (
     error instanceof Error &&
-    (error.name === 'ExitPromptError' || error.message.includes('force closed the prompt with SIGINT'))
+    (error.name === "ExitPromptError" ||
+      error.message.includes("force closed the prompt with SIGINT"))
   );
 }
 
@@ -99,10 +107,13 @@ function isPromptCancellationError(error: unknown): boolean {
  * Resolve the effective current profile state from global config defaults.
  */
 export function resolveCurrentProfileState(config: GlobalConfig): ProfileState {
-  const profile = config.profile || 'core';
-  const delivery = config.delivery || 'both';
+  const profile = config.profile || "core";
+  const delivery = config.delivery || "both";
   const workflows = [
-    ...getProfileWorkflows(profile, config.workflows ? [...config.workflows] : undefined),
+    ...getProfileWorkflows(
+      profile,
+      config.workflows ? [...config.workflows] : undefined,
+    ),
   ];
   return { profile, delivery, workflows };
 }
@@ -110,24 +121,29 @@ export function resolveCurrentProfileState(config: GlobalConfig): ProfileState {
 /**
  * Derive profile type from selected workflows.
  */
-export function deriveProfileFromWorkflowSelection(selectedWorkflows: string[]): Profile {
+export function deriveProfileFromWorkflowSelection(
+  selectedWorkflows: string[],
+): Profile {
   const isCoreMatch =
     selectedWorkflows.length === CORE_WORKFLOWS.length &&
     CORE_WORKFLOWS.every((w) => selectedWorkflows.includes(w));
-  if (isCoreMatch) return 'core';
+  if (isCoreMatch) return "core";
 
   const isSdtMatch =
     selectedWorkflows.length === SDT_WORKFLOWS.length &&
     SDT_WORKFLOWS.every((w) => selectedWorkflows.includes(w));
-  if (isSdtMatch) return 'sdt';
+  if (isSdtMatch) return "sdt";
 
-  return 'custom';
+  return "custom";
 }
 
 /**
  * Format a compact workflow summary for the profile header.
  */
-export function formatWorkflowSummary(workflows: readonly string[], profile: Profile): string {
+export function formatWorkflowSummary(
+  workflows: readonly string[],
+  profile: Profile,
+): string {
   return `${workflows.length} selected (${profile})`;
 }
 
@@ -142,7 +158,9 @@ function stableWorkflowOrder(workflows: readonly string[]): string[] {
     }
   }
 
-  const extras = workflows.filter((w) => !ALL_WORKFLOWS.includes(w as (typeof ALL_WORKFLOWS)[number]));
+  const extras = workflows.filter(
+    (w) => !ALL_WORKFLOWS.includes(w as (typeof ALL_WORKFLOWS)[number]),
+  );
   extras.sort();
   for (const extra of extras) {
     if (!seen.has(extra)) {
@@ -157,7 +175,10 @@ function stableWorkflowOrder(workflows: readonly string[]): string[] {
 /**
  * Build a user-facing diff summary between two profile states.
  */
-export function diffProfileState(before: ProfileState, after: ProfileState): ProfileStateDiff {
+export function diffProfileState(
+  before: ProfileState,
+  after: ProfileState,
+): ProfileStateDiff {
   const lines: string[] = [];
 
   if (before.delivery !== after.delivery) {
@@ -179,12 +200,12 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
   if (added.length > 0 || removed.length > 0) {
     const tokens: string[] = [];
     if (added.length > 0) {
-      tokens.push(`added ${added.join(', ')}`);
+      tokens.push(`added ${added.join(", ")}`);
     }
     if (removed.length > 0) {
-      tokens.push(`removed ${removed.join(', ')}`);
+      tokens.push(`removed ${removed.join(", ")}`);
     }
-    lines.push(`workflows: ${tokens.join('; ')}`);
+    lines.push(`workflows: ${tokens.join("; ")}`);
   }
 
   return {
@@ -196,7 +217,7 @@ export function diffProfileState(before: ProfileState, after: ProfileState): Pro
 function maybeWarnConfigDrift(
   projectDir: string,
   state: ProfileState,
-  colorize: (message: string) => string
+  colorize: (message: string) => string,
 ): void {
   const testspecDir = path.join(projectDir, TESTSPEC_DIR_NAME);
   if (!fs.existsSync(testspecDir)) {
@@ -205,7 +226,11 @@ function maybeWarnConfigDrift(
   if (!hasProjectConfigDrift(projectDir, state.workflows, state.delivery)) {
     return;
   }
-  console.log(colorize('Warning: Global config is not applied to this project. Run `testspec update` to sync.'));
+  console.log(
+    colorize(
+      "Warning: Global config is not applied to this project. Run `testspec update` to sync.",
+    ),
+  );
 }
 
 /**
@@ -215,30 +240,33 @@ function maybeWarnConfigDrift(
  */
 export function registerConfigCommand(program: Command): void {
   const configCmd = program
-    .command('config')
-    .description('View and modify global TestSpec configuration')
-    .option('--scope <scope>', 'Config scope (only "global" supported currently)')
-    .hook('preAction', (thisCommand) => {
+    .command("config")
+    .description("View and modify global TestSpec configuration")
+    .option(
+      "--scope <scope>",
+      'Config scope (only "global" supported currently)',
+    )
+    .hook("preAction", (thisCommand) => {
       const opts = thisCommand.opts();
-      if (opts.scope && opts.scope !== 'global') {
-        console.error('Error: Project-local config is not yet implemented');
+      if (opts.scope && opts.scope !== "global") {
+        console.error("Error: Project-local config is not yet implemented");
         process.exit(1);
       }
     });
 
   // config path
   configCmd
-    .command('path')
-    .description('Show config file location')
+    .command("path")
+    .description("Show config file location")
     .action(() => {
       console.log(getGlobalConfigPath());
     });
 
   // config list
   configCmd
-    .command('list')
-    .description('Show all current settings')
-    .option('--json', 'Output as JSON')
+    .command("list")
+    .description("Show all current settings")
+    .option("--json", "Output as JSON")
     .action((options: { json?: boolean }) => {
       const config = getGlobalConfig();
 
@@ -250,7 +278,7 @@ export function registerConfigCommand(program: Command): void {
         let rawConfig: Record<string, unknown> = {};
         try {
           if (fs.existsSync(configPath)) {
-            rawConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            rawConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
           }
         } catch {
           // If reading fails, treat all as defaults
@@ -259,25 +287,42 @@ export function registerConfigCommand(program: Command): void {
         console.log(formatValueYaml(config));
 
         // Annotate profile settings
-        const profileSource = rawConfig.profile !== undefined ? '(explicit)' : '(default)';
-        const deliverySource = rawConfig.delivery !== undefined ? '(explicit)' : '(default)';
+        const profileSource =
+          rawConfig.profile !== undefined ? "(explicit)" : "(default)";
+        const deliverySource =
+          rawConfig.delivery !== undefined ? "(explicit)" : "(default)";
         console.log(`\nProfile settings:`);
         console.log(`  profile: ${config.profile} ${profileSource}`);
         console.log(`  delivery: ${config.delivery} ${deliverySource}`);
-        if (config.profile === 'core') {
-          console.log(`  workflows: ${CORE_WORKFLOWS.join(', ')} (from core profile)`);
+        if (config.profile === "core") {
+          console.log(
+            `  workflows: ${CORE_WORKFLOWS.join(", ")} (from core profile)`,
+          );
+        } else if (config.profile === "sdt") {
+          console.log(
+            `  workflows: ${SDT_WORKFLOWS.join(", ")} (from sdt profile)`,
+          );
         } else if (config.workflows && config.workflows.length > 0) {
-          console.log(`  workflows: ${config.workflows.join(', ')} (explicit)`);
+          console.log(`  workflows: ${config.workflows.join(", ")} (explicit)`);
         } else {
-          console.log(`  workflows: (none)`);
+          // Try to get workflows from config.yaml for custom profiles
+          const configProfiles = getConfigProfileNames();
+          const profileWorkflows = getProfileWorkflows(config.profile as any);
+          if (profileWorkflows.length > 0) {
+            console.log(
+              `  workflows: ${profileWorkflows.join(", ")} (from config.yaml)`,
+            );
+          } else {
+            console.log(`  workflows: (none)`);
+          }
         }
       }
     });
 
   // config get
   configCmd
-    .command('get <key>')
-    .description('Get a specific value (raw, scriptable)')
+    .command("get <key>")
+    .description("Get a specific value (raw, scriptable)")
     .action((key: string) => {
       const config = getGlobalConfig();
       const value = getNestedValue(config as Record<string, unknown>, key);
@@ -287,7 +332,7 @@ export function registerConfigCommand(program: Command): void {
         return;
       }
 
-      if (typeof value === 'object' && value !== null) {
+      if (typeof value === "object" && value !== null) {
         console.log(JSON.stringify(value));
       } else {
         console.log(String(value));
@@ -296,50 +341,60 @@ export function registerConfigCommand(program: Command): void {
 
   // config set
   configCmd
-    .command('set <key> <value>')
-    .description('Set a value (auto-coerce types)')
-    .option('--string', 'Force value to be stored as string')
-    .option('--allow-unknown', 'Allow setting unknown keys')
-    .action((key: string, value: string, options: { string?: boolean; allowUnknown?: boolean }) => {
-      const allowUnknown = Boolean(options.allowUnknown);
-      const keyValidation = validateConfigKeyPath(key);
-      if (!keyValidation.valid && !allowUnknown) {
-        const reason = keyValidation.reason ? ` ${keyValidation.reason}.` : '';
-        console.error(`Error: Invalid configuration key "${key}".${reason}`);
-        console.error('Use "testspec config list" to see available keys.');
-        console.error('Pass --allow-unknown to bypass this check.');
-        process.exitCode = 1;
-        return;
-      }
+    .command("set <key> <value>")
+    .description("Set a value (auto-coerce types)")
+    .option("--string", "Force value to be stored as string")
+    .option("--allow-unknown", "Allow setting unknown keys")
+    .action(
+      (
+        key: string,
+        value: string,
+        options: { string?: boolean; allowUnknown?: boolean },
+      ) => {
+        const allowUnknown = Boolean(options.allowUnknown);
+        const keyValidation = validateConfigKeyPath(key);
+        if (!keyValidation.valid && !allowUnknown) {
+          const reason = keyValidation.reason
+            ? ` ${keyValidation.reason}.`
+            : "";
+          console.error(`Error: Invalid configuration key "${key}".${reason}`);
+          console.error('Use "testspec config list" to see available keys.');
+          console.error("Pass --allow-unknown to bypass this check.");
+          process.exitCode = 1;
+          return;
+        }
 
-      const config = getGlobalConfig() as Record<string, unknown>;
-      const coercedValue = coerceValue(value, options.string || false);
+        const config = getGlobalConfig() as Record<string, unknown>;
+        const coercedValue = coerceValue(value, options.string || false);
 
-      // Create a copy to validate before saving
-      const newConfig = JSON.parse(JSON.stringify(config));
-      setNestedValue(newConfig, key, coercedValue);
+        // Create a copy to validate before saving
+        const newConfig = JSON.parse(JSON.stringify(config));
+        setNestedValue(newConfig, key, coercedValue);
 
-      // Validate the new config
-      const validation = validateConfig(newConfig);
-      if (!validation.success) {
-        console.error(`Error: Invalid configuration - ${validation.error}`);
-        process.exitCode = 1;
-        return;
-      }
+        // Validate the new config
+        const validation = validateConfig(newConfig);
+        if (!validation.success) {
+          console.error(`Error: Invalid configuration - ${validation.error}`);
+          process.exitCode = 1;
+          return;
+        }
 
-      // Apply changes and save
-      setNestedValue(config, key, coercedValue);
-      saveGlobalConfig(config as GlobalConfig);
+        // Apply changes and save
+        setNestedValue(config, key, coercedValue);
+        saveGlobalConfig(config as GlobalConfig);
 
-      const displayValue =
-        typeof coercedValue === 'string' ? `"${coercedValue}"` : String(coercedValue);
-      console.log(`Set ${key} = ${displayValue}`);
-    });
+        const displayValue =
+          typeof coercedValue === "string"
+            ? `"${coercedValue}"`
+            : String(coercedValue);
+        console.log(`Set ${key} = ${displayValue}`);
+      },
+    );
 
   // config unset
   configCmd
-    .command('unset <key>')
-    .description('Remove a key (revert to default)')
+    .command("unset <key>")
+    .description("Remove a key (revert to default)")
     .action((key: string) => {
       const config = getGlobalConfig() as Record<string, unknown>;
       const existed = deleteNestedValue(config, key);
@@ -354,29 +409,29 @@ export function registerConfigCommand(program: Command): void {
 
   // config reset
   configCmd
-    .command('reset')
-    .description('Reset configuration to defaults')
-    .option('--all', 'Reset all configuration (required)')
-    .option('-y, --yes', 'Skip confirmation prompts')
+    .command("reset")
+    .description("Reset configuration to defaults")
+    .option("--all", "Reset all configuration (required)")
+    .option("-y, --yes", "Skip confirmation prompts")
     .action(async (options: { all?: boolean; yes?: boolean }) => {
       if (!options.all) {
-        console.error('Error: --all flag is required for reset');
-        console.error('Usage: testspec config reset --all [-y]');
+        console.error("Error: --all flag is required for reset");
+        console.error("Usage: testspec config reset --all [-y]");
         process.exitCode = 1;
         return;
       }
 
       if (!options.yes) {
-        const { confirm } = await import('@inquirer/prompts');
+        const { confirm } = await import("@inquirer/prompts");
         let confirmed: boolean;
         try {
           confirmed = await confirm({
-            message: 'Reset all configuration to defaults?',
+            message: "Reset all configuration to defaults?",
             default: false,
           });
         } catch (error) {
           if (isPromptCancellationError(error)) {
-            console.log('Reset cancelled.');
+            console.log("Reset cancelled.");
             process.exitCode = 130;
             return;
           }
@@ -384,26 +439,28 @@ export function registerConfigCommand(program: Command): void {
         }
 
         if (!confirmed) {
-          console.log('Reset cancelled.');
+          console.log("Reset cancelled.");
           return;
         }
       }
 
       saveGlobalConfig({ ...DEFAULT_CONFIG });
-      console.log('Configuration reset to defaults');
+      console.log("Configuration reset to defaults");
     });
 
   // config edit
   configCmd
-    .command('edit')
-    .description('Open config in $EDITOR')
+    .command("edit")
+    .description("Open config in $EDITOR")
     .action(async () => {
       const editor = process.env.EDITOR || process.env.VISUAL;
 
       if (!editor) {
-        console.error('Error: No editor configured');
-        console.error('Set the EDITOR or VISUAL environment variable to your preferred editor');
-        console.error('Example: export EDITOR=vim');
+        console.error("Error: No editor configured");
+        console.error(
+          "Set the EDITOR or VISUAL environment variable to your preferred editor",
+        );
+        console.error("Example: export EDITOR=vim");
         process.exitCode = 1;
         return;
       }
@@ -419,23 +476,23 @@ export function registerConfigCommand(program: Command): void {
       // Avoid shell parsing to correctly handle paths with spaces in both
       // the editor path and config path
       const child = spawn(editor, [configPath], {
-        stdio: 'inherit',
+        stdio: "inherit",
         shell: false,
       });
 
       await new Promise<void>((resolve, reject) => {
-        child.on('close', (code) => {
+        child.on("close", (code) => {
           if (code === 0) {
             resolve();
           } else {
             reject(new Error(`Editor exited with code ${code}`));
           }
         });
-        child.on('error', reject);
+        child.on("error", reject);
       });
 
       try {
-        const rawConfig = fs.readFileSync(configPath, 'utf-8');
+        const rawConfig = fs.readFileSync(configPath, "utf-8");
         const parsedConfig = JSON.parse(rawConfig);
         const validation = validateConfig(parsedConfig);
 
@@ -444,13 +501,15 @@ export function registerConfigCommand(program: Command): void {
           process.exitCode = 1;
         }
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
           console.error(`Error: Config file not found at ${configPath}`);
         } else if (error instanceof SyntaxError) {
           console.error(`Error: Invalid JSON in ${configPath}`);
           console.error(error.message);
         } else {
-          console.error(`Error: Unable to validate configuration - ${error instanceof Error ? error.message : String(error)}`);
+          console.error(
+            `Error: Unable to validate configuration - ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
         process.exitCode = 1;
       }
@@ -458,86 +517,110 @@ export function registerConfigCommand(program: Command): void {
 
   // config profile [preset]
   configCmd
-    .command('profile [preset]')
-    .description('Configure workflow profile (interactive picker or preset shortcut)')
+    .command("profile [preset]")
+    .description(
+      "Configure workflow profile (interactive picker or preset shortcut)",
+    )
     .action(async (preset?: string) => {
-      // Preset shortcut: `testspec config profile core` or `testspec config profile sdt`
-      if (preset === 'core') {
+      // Preset shortcut: `testspec config profile core` or `testspec config profile sdt` or custom profile name
+      if (
+        preset &&
+        BUILTIN_PROFILES.includes(preset as (typeof BUILTIN_PROFILES)[number])
+      ) {
         const config = getGlobalConfig();
-        config.profile = 'core';
-        config.workflows = [...CORE_WORKFLOWS];
+        config.profile = preset as Profile;
+        // Clear workflows - they will be resolved from config.yaml when needed
+        delete config.workflows;
         // Preserve delivery setting
         saveGlobalConfig(config);
-        console.log('Config updated. Run `testspec update` in your projects to apply.');
+        console.log(
+          `Profile set to '${preset}'. Run \`testspec update\` in your projects to apply.`,
+        );
+        console.log(
+          `Workflows will be resolved from testspec/config.yaml profiles mapping.`,
+        );
         return;
       }
 
-      if (preset === 'sdt') {
-        const config = getGlobalConfig();
-        config.profile = 'sdt';
-        config.workflows = [...SDT_WORKFLOWS];
-        // Preserve delivery setting
-        saveGlobalConfig(config);
-        console.log('Config updated. Run `testspec update` in your projects to apply.');
-        return;
-      }
-
+      // Check if it's a custom profile name (not a built-in preset)
       if (preset) {
-        console.error(`Error: Unknown profile preset "${preset}". Available presets: core, sdt`);
-        process.exitCode = 1;
+        // For custom profile names, check if config.yaml has this profile
+        // Just set it in global config - workflows will be resolved from config.yaml
+        const config = getGlobalConfig();
+        config.profile = preset as Profile;
+        delete config.workflows;
+        saveGlobalConfig(config);
+        console.log(
+          `流程模式已经设置为 '${preset}'. 请运行命令 \`testspec update\` 来应用这个配置.`,
+        );
+        console.log(
+          `提示: 确保 'profiles.${preset}' 已经在你的 testspec/config.yaml 文件中定义了，否则将不生成任何对应的命令和技能`,
+        );
         return;
       }
 
       // Non-interactive check
       if (!process.stdout.isTTY) {
-        console.error('Interactive mode required. Use `testspec config profile core` or set config via environment/flags.');
+        console.error(
+          "Interactive mode required. Use `testspec config profile core` or set config via environment/flags.",
+        );
         process.exitCode = 1;
         return;
       }
 
       // Interactive picker
-      const { select, checkbox, confirm } = await import('@inquirer/prompts');
-      const chalk = (await import('chalk')).default;
+      const { select, checkbox, confirm } = await import("@inquirer/prompts");
+      const chalk = (await import("chalk")).default;
 
       try {
         const config = getGlobalConfig();
         const currentState = resolveCurrentProfileState(config);
 
-        console.log(chalk.bold('\nCurrent profile settings'));
+        console.log(chalk.bold("\nCurrent profile settings"));
         console.log(`  Delivery: ${currentState.delivery}`);
-        console.log(`  Workflows: ${formatWorkflowSummary(currentState.workflows, currentState.profile)}`);
-        console.log(chalk.dim('  Delivery = where workflows are installed (skills, commands, or both)'));
-        console.log(chalk.dim('  Workflows = which actions are available (propose, explore, apply, etc.)'));
+        console.log(
+          `  Workflows: ${formatWorkflowSummary(currentState.workflows, currentState.profile)}`,
+        );
+        console.log(
+          chalk.dim(
+            "  Delivery = where workflows are installed (skills, commands, or both)",
+          ),
+        );
+        console.log(
+          chalk.dim(
+            "  Workflows = which actions are available (propose, explore, apply, etc.)",
+          ),
+        );
         console.log();
 
         const action = await select<ProfileAction>({
-          message: 'What do you want to configure?',
+          message: "What do you want to configure?",
           choices: [
             {
-              value: 'both',
-              name: 'Delivery and workflows',
-              description: 'Update install mode and available actions together',
+              value: "both",
+              name: "Delivery and workflows",
+              description: "Update install mode and available actions together",
             },
             {
-              value: 'delivery',
-              name: 'Delivery only',
-              description: 'Change where workflows are installed',
+              value: "delivery",
+              name: "Delivery only",
+              description: "Change where workflows are installed",
             },
             {
-              value: 'workflows',
-              name: 'Workflows only',
-              description: 'Change which workflow actions are available',
+              value: "workflows",
+              name: "Workflows only",
+              description: "Change which workflow actions are available",
             },
             {
-              value: 'keep',
-              name: 'Keep current settings (exit)',
-              description: 'Leave configuration unchanged and exit',
+              value: "keep",
+              name: "Keep current settings (exit)",
+              description: "Leave configuration unchanged and exit",
             },
           ],
         });
 
-        if (action === 'keep') {
-          console.log('No config changes.');
+        if (action === "keep") {
+          console.log("No config changes.");
           maybeWarnConfigDrift(process.cwd(), currentState, chalk.yellow);
           return;
         }
@@ -548,38 +631,43 @@ export function registerConfigCommand(program: Command): void {
           workflows: [...currentState.workflows],
         };
 
-        if (action === 'both' || action === 'delivery') {
-          const deliveryChoices: { value: Delivery; name: string; description: string }[] = [
+        if (action === "both" || action === "delivery") {
+          const deliveryChoices: {
+            value: Delivery;
+            name: string;
+            description: string;
+          }[] = [
             {
-              value: 'both' as Delivery,
-              name: 'Both (skills + commands)',
-              description: 'Install workflows as both skills and slash commands',
+              value: "both" as Delivery,
+              name: "Both (skills + commands)",
+              description:
+                "Install workflows as both skills and slash commands",
             },
             {
-              value: 'skills' as Delivery,
-              name: 'Skills only',
-              description: 'Install workflows only as skills',
+              value: "skills" as Delivery,
+              name: "Skills only",
+              description: "Install workflows only as skills",
             },
             {
-              value: 'commands' as Delivery,
-              name: 'Commands only',
-              description: 'Install workflows only as slash commands',
+              value: "commands" as Delivery,
+              name: "Commands only",
+              description: "Install workflows only as slash commands",
             },
           ];
           for (const choice of deliveryChoices) {
             if (choice.value === currentState.delivery) {
-              choice.name += ' [current]';
+              choice.name += " [current]";
             }
           }
 
           nextState.delivery = await select<Delivery>({
-            message: 'Delivery mode (how workflows are installed):',
+            message: "Delivery mode (how workflows are installed):",
             choices: deliveryChoices,
             default: currentState.delivery,
           });
         }
 
-        if (action === 'both' || action === 'workflows') {
+        if (action === "both" || action === "workflows") {
           const formatWorkflowChoice = (workflow: string) => {
             const metadata = WORKFLOW_PROMPT_META[workflow] ?? {
               name: workflow,
@@ -595,29 +683,30 @@ export function registerConfigCommand(program: Command): void {
           };
 
           const selectedWorkflows = await checkbox<string>({
-            message: 'Select workflows to make available:',
-            instructions: 'Space to toggle, Enter to confirm',
+            message: "Select workflows to make available:",
+            instructions: "Space to toggle, Enter to confirm",
             pageSize: ALL_WORKFLOWS.length,
             theme: {
               icon: {
-                checked: '[x]',
-                unchecked: '[ ]',
+                checked: "[x]",
+                unchecked: "[ ]",
               },
             },
             choices: ALL_WORKFLOWS.map(formatWorkflowChoice),
           });
           nextState.workflows = selectedWorkflows;
-          nextState.profile = deriveProfileFromWorkflowSelection(selectedWorkflows);
+          nextState.profile =
+            deriveProfileFromWorkflowSelection(selectedWorkflows);
         }
 
         const diff = diffProfileState(currentState, nextState);
         if (!diff.hasChanges) {
-          console.log('No config changes.');
+          console.log("No config changes.");
           maybeWarnConfigDrift(process.cwd(), nextState, chalk.yellow);
           return;
         }
 
-        console.log(chalk.bold('\nConfig changes:'));
+        console.log(chalk.bold("\nConfig changes:"));
         for (const line of diff.lines) {
           console.log(`  ${line}`);
         }
@@ -633,26 +722,35 @@ export function registerConfigCommand(program: Command): void {
         const testspecDir = path.join(projectDir, TESTSPEC_DIR_NAME);
         if (fs.existsSync(testspecDir)) {
           const applyNow = await confirm({
-            message: 'Apply changes to this project now?',
+            message: "Apply changes to this project now?",
             default: true,
           });
 
           if (applyNow) {
             try {
-              execSync('npx testspec update', { stdio: 'inherit', cwd: projectDir });
-              console.log('Run `testspec update` in your other projects to apply.');
+              execSync("npx testspec update", {
+                stdio: "inherit",
+                cwd: projectDir,
+              });
+              console.log(
+                "Run `testspec update` in your other projects to apply.",
+              );
             } catch {
-              console.error('`testspec update` failed. Please run it manually to apply the profile changes.');
+              console.error(
+                "`testspec update` failed. Please run it manually to apply the profile changes.",
+              );
               process.exitCode = 1;
             }
             return;
           }
         }
 
-        console.log('Config updated. Run `testspec update` in your projects to apply.');
+        console.log(
+          "Config updated. Run `testspec update` in your projects to apply.",
+        );
       } catch (error) {
         if (isPromptCancellationError(error)) {
-          console.log('Config profile cancelled.');
+          console.log("Config profile cancelled.");
           process.exitCode = 130;
           return;
         }

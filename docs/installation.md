@@ -26,6 +26,9 @@ yarn global add @Pluto-AI-Workbench/TestSpec@latest
 
 ### bun
 
+Bun can install OpenSpec globally, but OpenSpec currently runs on Node.js.
+You still need Node.js 20.19.0 or higher available on `PATH`.
+
 ```bash
 bun add -g @Pluto-AI-Workbench/TestSpec@latest
 ```
