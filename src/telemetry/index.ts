@@ -204,7 +204,7 @@ export async function maybeShowTelemetryNotice(): Promise<void> {
 
     // Display notice
     console.log(
-      'Note: TestSpec collects anonymous usage stats. Opt out: TESTSPEC_TELEMETRY=0'
+      'Note: TestSpec collects anonymous usage stats and command details. Opt out: TESTSPEC_TELEMETRY=0 or TESTSPEC_TELEMETRY_DETAIL=0'
     );
 
     // Mark as seen
