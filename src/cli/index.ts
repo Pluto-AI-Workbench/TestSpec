@@ -32,6 +32,13 @@ import {
 } from '../commands/workflow/index.js';
 import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
 
+interface PendingTelemetry {
+  commandPath: string;
+  startTime: number;
+}
+
+let pendingTelemetry: PendingTelemetry | null = null;
+
 const program = new Command();
 const require = createRequire(import.meta.url);
 const { version } = require('../../package.json');
@@ -74,16 +81,21 @@ program.hook('preAction', async (thisCommand, actionCommand) => {
     process.env.NO_COLOR = '1';
   }
 
-  // Show first-run telemetry notice (if not seen)
   await maybeShowTelemetryNotice();
 
-  // Track command execution (use actionCommand to get the actual subcommand)
-  const commandPath = getCommandPath(actionCommand);
-  await trackCommand(commandPath, version);
+  pendingTelemetry = {
+    commandPath: getCommandPath(actionCommand),
+    startTime: Date.now(),
+  };
 });
 
 // Shutdown telemetry after command completes
 program.hook('postAction', async () => {
+  if (pendingTelemetry) {
+    const durationMs = Date.now() - pendingTelemetry.startTime;
+    await trackCommand(pendingTelemetry.commandPath, version, { durationMs });
+    pendingTelemetry = null;
+  }
   await shutdown();
 });
 
