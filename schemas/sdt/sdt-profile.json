@@ -1,0 +1,27 @@
+{
+  "sdt-new": {
+    "description": "测试项目初始化",
+    "artifacts": []
+  },
+  "sdt-clarify": {
+    "description": "需求澄清阶段",
+    "artifacts": [
+      "clarify-sdt-requirements",
+      "clarify-sdt-spec",
+      "clarify-risk-assessment"
+    ]
+  },
+  "sdt-design": {
+    "description": "测试设计阶段",
+    "artifacts": [
+      "design-test-points",
+      "design-manual-case"
+    ]
+  },
+  "sdt-build": {
+    "description": "测试构建阶段",
+    "artifacts": [
+      "build-scripts"
+    ]
+  }
+}

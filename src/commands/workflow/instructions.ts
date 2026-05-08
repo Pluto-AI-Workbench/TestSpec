@@ -21,6 +21,8 @@ import {
   type TaskItem,
   type ApplyInstructions,
 } from './shared.js';
+import { runBuiltinChecks } from '../../core/artifact-graph/built-in-checks.js';
+import { runCustomChecks } from '../../core/artifact-graph/custom-check-loader.js';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -277,6 +279,17 @@ export async function generateApplyInstructions(
     const outputs = resolveArtifactOutputs(changeDir, artifact.generates);
     if (outputs.length > 0) {
       contextFiles[artifact.id] = outputs;
+    }
+  }
+
+  // Run artifact post-generation checks
+  for (const artifact of schema.artifacts) {
+    // 1. Run built-in checks (mandatory)
+    await runBuiltinChecks(changeDir, artifact.id, artifact.generates);
+
+    // 2. Run custom checks (if configured)
+    if (artifact.checks && artifact.checks.length > 0) {
+      await runCustomChecks(artifact.checks, artifact.id, artifact.generates, projectRoot);
     }
   }
 
