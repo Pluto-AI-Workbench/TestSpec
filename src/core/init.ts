@@ -19,7 +19,7 @@ import {
 } from './config.js';
 import { PALETTE } from './styles/palette.js';
 import { isInteractive } from '../utils/interactive.js';
-import { serializeConfig, DEFAULT_PROFILES } from './config-prompts.js';
+import { serializeConfig, DEFAULT_PROFILES, DEFAULT_PROJECT_PROFILE } from './config-prompts.js';
 import {
   generateCommands,
   CommandAdapterRegistry,
@@ -619,7 +619,14 @@ export class InitCommand {
     }
 
     try {
-      const yamlContent = serializeConfig({ schema: DEFAULT_SCHEMA, profiles: DEFAULT_PROFILES });
+      // Use project-level default profile (not from global config)
+      // Priority: config.yaml > project default
+      // When creating new config, use project default
+      const yamlContent = serializeConfig({
+        schema: DEFAULT_SCHEMA,
+        profile: DEFAULT_PROJECT_PROFILE,
+        profiles: DEFAULT_PROFILES
+      });
       await FileSystemUtils.writeFile(configPath, yamlContent);
       return 'created';
     } catch {

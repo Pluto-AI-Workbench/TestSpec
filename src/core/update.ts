@@ -5,18 +5,18 @@
  * Supports profile-aware updates, delivery changes, migration, and smart update detection.
  */
 
-import path from "path";
-import chalk from "chalk";
-import ora from "ora";
-import * as fs from "fs";
-import { createRequire } from "module";
-import { FileSystemUtils } from "../utils/file-system.js";
-import { transformToHyphenCommands } from "../utils/command-references.js";
-import { AI_TOOLS, TESTSPEC_DIR_NAME } from "./config.js";
+import path from 'path';
+import chalk from 'chalk';
+import ora from 'ora';
+import * as fs from 'fs';
+import { createRequire } from 'module';
+import { FileSystemUtils } from '../utils/file-system.js';
+import { transformToHyphenCommands } from '../utils/command-references.js';
+import { AI_TOOLS, TESTSPEC_DIR_NAME } from './config.js';
 import {
   generateCommands,
   CommandAdapterRegistry,
-} from "./command-generation/index.js";
+} from './command-generation/index.js';
 import {
   getToolVersionStatus,
   getSkillTemplates,
@@ -24,7 +24,7 @@ import {
   generateSkillContent,
   getToolsWithSkillsDir,
   type ToolVersionStatus,
-} from "./shared/index.js";
+} from './shared/index.js';
 import {
   detectLegacyArtifacts,
   cleanupLegacyArtifacts,
@@ -32,35 +32,39 @@ import {
   formatDetectionSummary,
   getToolsFromLegacyArtifacts,
   type LegacyDetectionResult,
-} from "./legacy-cleanup.js";
-import { isInteractive } from "../utils/interactive.js";
+} from './legacy-cleanup.js';
+import { isInteractive } from '../utils/interactive.js';
 import {
   getGlobalConfig,
+  saveGlobalConfig,
   type Delivery,
   type Profile,
-} from "./global-config.js";
-import { getProfileWorkflows, ALL_WORKFLOWS } from "./profiles.js";
-import { getAvailableTools } from "./available-tools.js";
+} from './global-config.js';
+import { getProfileWorkflows, ALL_WORKFLOWS } from './profiles.js';
+import { getAvailableTools } from './available-tools.js';
 import {
   WORKFLOW_TO_SKILL_DIR,
   getCommandConfiguredTools,
   getConfiguredToolsForProfileSync,
   getToolsNeedingProfileSync,
-} from "./profile-sync-drift.js";
+} from './profile-sync-drift.js';
 import {
   scanInstalledWorkflows as scanInstalledWorkflowsShared,
   migrateIfNeeded as migrateIfNeededShared,
-
 } from './migration.js';
 import { readProjectConfig } from './project-config.js';
-import { getProjectSchemasDir, getPackageSchemasDir } from './artifact-graph/resolver.js';
+import { serializeConfig, DEFAULT_PROFILES } from './config-prompts.js';
+import {
+  getProjectSchemasDir,
+  getPackageSchemasDir,
+} from './artifact-graph/resolver.js';
 import { parseSchema } from './artifact-graph/schema.js';
 import { stringify as stringifyYaml } from 'yaml';
 
 const require = createRequire(import.meta.url);
-const { version: TESTSPEC_VERSION } = require("../../package.json");
+const { version: TESTSPEC_VERSION } = require('../../package.json');
 
-const OLD_CORE_WORKFLOWS = ["propose", "explore", "apply", "archive"] as const;
+const OLD_CORE_WORKFLOWS = ['propose', 'explore', 'apply', 'archive'] as const;
 
 /**
  * Options for the update command.
@@ -81,7 +85,7 @@ export function scanInstalledWorkflows(
   toolIds: string[],
 ): string[] {
   const tools = toolIds
-    .map((id) => AI_TOOLS.find((t) => t.value === id))
+    .map(id => AI_TOOLS.find(t => t.value === id))
     .filter((t): t is NonNullable<typeof t> => t != null);
   return scanInstalledWorkflowsShared(projectPath, tools);
 }
@@ -109,10 +113,14 @@ export class UpdateCommand {
     const detectedTools = getAvailableTools(resolvedProjectPath);
     migrateIfNeededShared(resolvedProjectPath, detectedTools);
 
-    // 3. Read global config for profile/delivery
+    // 3. Read profile and delivery - prioritize project config, then global config
+    // Priority: config.yaml > global config > project default
+    const projectConfig = readProjectConfig(resolvedProjectPath);
     const globalConfig = getGlobalConfig();
-    const profile = globalConfig.profile ?? "core";
-    const delivery: Delivery = globalConfig.delivery ?? "both";
+
+    // Profile: config.yaml has highest priority, then global config, then project default
+    const profile = projectConfig?.profile ?? globalConfig.profile ?? 'sdt';
+    const delivery: Delivery = globalConfig.delivery ?? 'both';
     const profileWorkflows = getProfileWorkflows(
       profile,
       globalConfig.workflows,
@@ -121,8 +129,8 @@ export class UpdateCommand {
       (workflow): workflow is (typeof ALL_WORKFLOWS)[number] =>
         (ALL_WORKFLOWS as readonly string[]).includes(workflow),
     );
-    const shouldGenerateSkills = delivery !== "commands";
-    const shouldGenerateCommands = delivery !== "skills";
+    const shouldGenerateSkills = delivery !== 'commands';
+    const shouldGenerateCommands = delivery !== 'skills';
 
     // 3.1 Generate customized schema from config profiles
     await this.generateSchemaFromConfig(resolvedProjectPath);
@@ -139,7 +147,7 @@ export class UpdateCommand {
       getConfiguredToolsForProfileSync(resolvedProjectPath);
 
     if (configuredTools.length === 0 && newlyConfiguredTools.length === 0) {
-      console.log(chalk.yellow("No configured tools found."));
+      console.log(chalk.yellow('No configured tools found.'));
       console.log(chalk.dim('Run "testspec init" to set up tools.'));
       return;
     }
@@ -148,7 +156,7 @@ export class UpdateCommand {
     const commandConfiguredTools =
       getCommandConfiguredTools(resolvedProjectPath);
     const commandConfiguredSet = new Set(commandConfiguredTools);
-    const toolStatuses = configuredTools.map((toolId) => {
+    const toolStatuses = configuredTools.map(toolId => {
       const status = getToolVersionStatus(
         resolvedProjectPath,
         toolId,
@@ -160,13 +168,13 @@ export class UpdateCommand {
       return status;
     });
     const statusByTool = new Map(
-      toolStatuses.map((status) => [status.toolId, status] as const),
+      toolStatuses.map(status => [status.toolId, status] as const),
     );
 
     // 7. Smart update detection
     const toolsNeedingVersionUpdate = toolStatuses
-      .filter((s) => s.needsUpdate)
-      .map((s) => s.toolId);
+      .filter(s => s.needsUpdate)
+      .map(s => s.toolId);
     const toolsNeedingConfigSync = getToolsNeedingProfileSync(
       resolvedProjectPath,
       desiredWorkflows,
@@ -178,7 +186,7 @@ export class UpdateCommand {
       ...toolsNeedingConfigSync,
     ]);
     const toolsUpToDate = toolStatuses.filter(
-      (s) => !toolsToUpdateSet.has(s.toolId),
+      s => !toolsToUpdateSet.has(s.toolId),
     );
 
     if (!this.force && toolsToUpdateSet.size === 0) {
@@ -199,7 +207,7 @@ export class UpdateCommand {
     // 8. Display update plan
     if (this.force) {
       console.log(
-        `Force updating ${configuredTools.length} tool(s): ${configuredTools.join(", ")}`,
+        `Force updating ${configuredTools.length} tool(s): ${configuredTools.join(', ')}`,
       );
     } else {
       this.displayUpdatePlan(
@@ -228,7 +236,7 @@ export class UpdateCommand {
     let removedDeselectedSkillCount = 0;
 
     for (const toolId of toolsToUpdate) {
-      const tool = AI_TOOLS.find((t) => t.value === toolId);
+      const tool = AI_TOOLS.find(t => t.value === toolId);
       if (!tool?.skillsDir) continue;
 
       const spinner = ora(`Updating ${tool.name}...`).start();
@@ -237,18 +245,18 @@ export class UpdateCommand {
         const skillsDir = path.join(
           resolvedProjectPath,
           tool.skillsDir,
-          "skills",
+          'skills',
         );
 
         // Generate skill files if delivery includes skills
         if (shouldGenerateSkills) {
           for (const { template, dirName } of skillTemplates) {
             const skillDir = path.join(skillsDir, dirName);
-            const skillFile = path.join(skillDir, "SKILL.md");
+            const skillFile = path.join(skillDir, 'SKILL.md');
 
             // Use hyphen-based command references for OpenCode
             const transformer =
-              tool.value === "opencode" || tool.value === "pi"
+              tool.value === 'opencode' || tool.value === 'pi'
                 ? transformToHyphenCommands
                 : undefined;
             const skillContent = generateSkillContent(
@@ -319,14 +327,14 @@ export class UpdateCommand {
     if (updatedTools.length > 0) {
       console.log(
         chalk.green(
-          `✓ Updated: ${updatedTools.join(", ")} (v${TESTSPEC_VERSION})`,
+          `✓ Updated: ${updatedTools.join(', ')} (v${TESTSPEC_VERSION})`,
         ),
       );
     }
     if (failedTools.length > 0) {
       console.log(
         chalk.red(
-          `✗ Failed: ${failedTools.map((f) => `${f.name} (${f.error})`).join(", ")}`,
+          `✗ Failed: ${failedTools.map(f => `${f.name} (${f.error})`).join(', ')}`,
         ),
       );
     }
@@ -362,13 +370,13 @@ export class UpdateCommand {
     // 12. Show onboarding message for newly configured tools from legacy upgrade
     if (newlyConfiguredTools.length > 0) {
       console.log();
-      console.log(chalk.bold("Getting started:"));
-      console.log("  /testspec:new       Start a new change");
-      console.log("  /testspec:continue  Create the next artifact");
-      console.log("  /testspec:apply     Implement tasks");
+      console.log(chalk.bold('Getting started:'));
+      console.log('  /testspec:new       Start a new change');
+      console.log('  /testspec:continue  Create the next artifact');
+      console.log('  /testspec:apply     Implement tasks');
       console.log();
       console.log(
-        `Learn more: ${chalk.cyan("https://github.com/Pluto-AI-Workbench/TestSpec")}`,
+        `Learn more: ${chalk.cyan('https://github.com/Pluto-AI-Workbench/TestSpec')}`,
       );
     }
 
@@ -390,26 +398,29 @@ export class UpdateCommand {
     // 15. List affected tools
     if (updatedTools.length > 0) {
       const toolDisplayNames = updatedTools;
-      console.log(chalk.dim(`Tools: ${toolDisplayNames.join(", ")}`));
+      console.log(chalk.dim(`Tools: ${toolDisplayNames.join(', ')}`));
     }
 
+    // 16. Sync profile to project config.yaml
+    await this.syncProfileToConfig(resolvedProjectPath, profile);
+
     console.log();
-    console.log(chalk.dim("Restart your IDE for changes to take effect."));
+    console.log(chalk.dim('Restart your IDE for changes to take effect.'));
   }
 
   /**
    * Display message when all tools are up to date.
    */
   private displayUpToDateMessage(toolStatuses: ToolVersionStatus[]): void {
-    const toolNames = toolStatuses.map((s) => s.toolId);
+    const toolNames = toolStatuses.map(s => s.toolId);
     console.log(
       chalk.green(
         `✓ All ${toolStatuses.length} tool(s) up to date (v${TESTSPEC_VERSION})`,
       ),
     );
-    console.log(chalk.dim(`  Tools: ${toolNames.join(", ")}`));
+    console.log(chalk.dim(`  Tools: ${toolNames.join(', ')}`));
     console.log();
-    console.log(chalk.dim("Use --force to refresh files anyway."));
+    console.log(chalk.dim('Use --force to refresh files anyway.'));
   }
 
   /**
@@ -420,22 +431,22 @@ export class UpdateCommand {
     statusByTool: Map<string, ToolVersionStatus>,
     upToDate: ToolVersionStatus[],
   ): void {
-    const updates = toolsToUpdate.map((toolId) => {
+    const updates = toolsToUpdate.map(toolId => {
       const status = statusByTool.get(toolId);
       if (status?.needsUpdate) {
-        const fromVersion = status.generatedByVersion ?? "unknown";
+        const fromVersion = status.generatedByVersion ?? 'unknown';
         return `${status.toolId} (${fromVersion} → ${TESTSPEC_VERSION})`;
       }
       return `${toolId} (config sync)`;
     });
 
     console.log(
-      `Updating ${toolsToUpdate.length} tool(s): ${updates.join(", ")}`,
+      `Updating ${toolsToUpdate.length} tool(s): ${updates.join(', ')}`,
     );
 
     if (upToDate.length > 0) {
-      const upToDateNames = upToDate.map((s) => s.toolId);
-      console.log(chalk.dim(`Already up to date: ${upToDateNames.join(", ")}`));
+      const upToDateNames = upToDate.map(s => s.toolId);
+      console.log(chalk.dim(`Already up to date: ${upToDateNames.join(', ')}`));
     }
   }
 
@@ -446,17 +457,17 @@ export class UpdateCommand {
     const availableTools = getAvailableTools(projectPath);
     const configuredSet = new Set(configuredTools);
 
-    const newTools = availableTools.filter((t) => !configuredSet.has(t.value));
+    const newTools = availableTools.filter(t => !configuredSet.has(t.value));
 
     if (newTools.length > 0) {
-      const newToolNames = newTools.map((tool) => tool.name);
+      const newToolNames = newTools.map(tool => tool.name);
       const isSingleTool = newToolNames.length === 1;
-      const toolNoun = isSingleTool ? "tool" : "tools";
-      const pronoun = isSingleTool ? "it" : "them";
+      const toolNoun = isSingleTool ? 'tool' : 'tools';
+      const pronoun = isSingleTool ? 'it' : 'them';
       console.log();
       console.log(
         chalk.yellow(
-          `Detected new ${toolNoun}: ${newToolNames.join(", ")}. Run 'testspec init' to add ${pronoun}.`,
+          `Detected new ${toolNoun}: ${newToolNames.join(', ')}. Run 'testspec init' to add ${pronoun}.`,
         ),
       );
     }
@@ -475,7 +486,7 @@ export class UpdateCommand {
       configuredTools,
     );
     const profileSet = new Set(profileWorkflows);
-    const extraWorkflows = installedWorkflows.filter((w) => !profileSet.has(w));
+    const extraWorkflows = installedWorkflows.filter(w => !profileSet.has(w));
 
     if (extraWorkflows.length > 0) {
       console.log(
@@ -494,27 +505,27 @@ export class UpdateCommand {
     profile: Profile,
     workflows?: readonly string[],
   ): void {
-    if (profile !== "custom" || !workflows) {
+    if (profile !== 'custom' || !workflows) {
       return;
     }
 
     const workflowSet = new Set(workflows);
-    // const matchesOldCore =
-    //   workflowSet.size === OLD_CORE_WORKFLOWS.length &&
-    //   OLD_CORE_WORKFLOWS.every((workflow) => workflowSet.has(workflow));
+    const matchesOldCore =
+      workflowSet.size === OLD_CORE_WORKFLOWS.length &&
+      OLD_CORE_WORKFLOWS.every(workflow => workflowSet.has(workflow));
 
-    // if (!matchesOldCore) {
-    //   return;
-    // }
+    if (!matchesOldCore) {
+      return;
+    }
 
     console.log(
       chalk.dim(
-        "Note: The core profile now includes sync. Your custom profile is preserving the old core workflow set.",
+        'Note: The core profile now includes sync. Your custom profile is preserving the old core workflow set.',
       ),
     );
     console.log(
       chalk.dim(
-        "Run `testspec config profile core` and then `testspec update` to add sync.",
+        'Run `testspec config profile core` and then `testspec update` to add sync.',
       ),
     );
   }
@@ -684,7 +695,7 @@ export class UpdateCommand {
       // (Unlike init, update doesn't abort - user may just want to update skills)
       console.log(
         chalk.yellow(
-          "⚠ Run with --force to auto-cleanup legacy files, or run interactively.",
+          '⚠ Run with --force to auto-cleanup legacy files, or run interactively.',
         ),
       );
       console.log();
@@ -692,9 +703,9 @@ export class UpdateCommand {
     }
 
     // Interactive mode: prompt for confirmation
-    const { confirm } = await import("@inquirer/prompts");
+    const { confirm } = await import('@inquirer/prompts');
     const shouldCleanup = await confirm({
-      message: "Upgrade and clean up legacy files?",
+      message: 'Upgrade and clean up legacy files?',
       default: true,
     });
 
@@ -710,7 +721,7 @@ export class UpdateCommand {
       );
     } else {
       console.log(
-        chalk.dim("Skipping legacy cleanup. Continuing with skill update..."),
+        chalk.dim('Skipping legacy cleanup. Continuing with skill update...'),
       );
       console.log();
       return [];
@@ -724,11 +735,11 @@ export class UpdateCommand {
     projectPath: string,
     detection: LegacyDetectionResult,
   ): Promise<void> {
-    const spinner = ora("Cleaning up legacy files...").start();
+    const spinner = ora('Cleaning up legacy files...').start();
 
     const result = await cleanupLegacyArtifacts(projectPath, detection);
 
-    spinner.succeed("Legacy files cleaned up");
+    spinner.succeed('Legacy files cleaned up');
 
     const summary = formatCleanupSummary(result);
     if (summary) {
@@ -763,7 +774,7 @@ export class UpdateCommand {
 
     // Filter to tools that aren't already configured
     const unconfiguredLegacyTools = legacyTools.filter(
-      (t) => !configuredSet.has(t),
+      t => !configuredSet.has(t),
     );
 
     if (unconfiguredLegacyTools.length === 0) {
@@ -772,7 +783,7 @@ export class UpdateCommand {
 
     // Get valid tools (those with skillsDir)
     const validToolIds = new Set(getToolsWithSkillsDir());
-    const validUnconfiguredTools = unconfiguredLegacyTools.filter((t) =>
+    const validUnconfiguredTools = unconfiguredLegacyTools.filter(t =>
       validToolIds.has(t),
     );
 
@@ -781,9 +792,9 @@ export class UpdateCommand {
     }
 
     // Show what tools were detected from legacy artifacts
-    console.log(chalk.bold("Tools detected from legacy artifacts:"));
+    console.log(chalk.bold('Tools detected from legacy artifacts:'));
     for (const toolId of validUnconfiguredTools) {
-      const tool = AI_TOOLS.find((t) => t.value === toolId);
+      const tool = AI_TOOLS.find(t => t.value === toolId);
       console.log(`  • ${tool?.name || toolId}`);
     }
     console.log();
@@ -793,14 +804,14 @@ export class UpdateCommand {
     if (this.force || !canPrompt) {
       // Non-interactive with --force: auto-select detected tools
       selectedTools = validUnconfiguredTools;
-      console.log(`Setting up skills for: ${selectedTools.join(", ")}`);
+      console.log(`Setting up skills for: ${selectedTools.join(', ')}`);
     } else {
       // Interactive mode: prompt for tool selection with detected tools pre-selected
       const { searchableMultiSelect } =
-        await import("../prompts/searchable-multi-select.js");
+        await import('../prompts/searchable-multi-select.js');
 
-      const sortedChoices = validUnconfiguredTools.map((toolId) => {
-        const tool = AI_TOOLS.find((t) => t.value === toolId);
+      const sortedChoices = validUnconfiguredTools.map(toolId => {
+        const tool = AI_TOOLS.find(t => t.value === toolId);
         return {
           name: tool?.name || toolId,
           value: toolId,
@@ -810,14 +821,14 @@ export class UpdateCommand {
       });
 
       selectedTools = await searchableMultiSelect({
-        message: "Select tools to set up with the new skill system:",
+        message: 'Select tools to set up with the new skill system:',
         pageSize: 15,
         choices: sortedChoices,
         validate: (_selected: string[]) => true, // Allow empty selection (user can skip)
       });
 
       if (selectedTools.length === 0) {
-        console.log(chalk.dim("Skipping tool setup."));
+        console.log(chalk.dim('Skipping tool setup.'));
         console.log();
         return [];
       }
@@ -825,8 +836,8 @@ export class UpdateCommand {
 
     // Create skills/commands for selected tools using effective profile+delivery.
     const newlyConfigured: string[] = [];
-    const shouldGenerateSkills = delivery !== "commands";
-    const shouldGenerateCommands = delivery !== "skills";
+    const shouldGenerateSkills = delivery !== 'commands';
+    const shouldGenerateCommands = delivery !== 'skills';
     const skillTemplates = shouldGenerateSkills
       ? getSkillTemplates(desiredWorkflows)
       : [];
@@ -835,23 +846,23 @@ export class UpdateCommand {
       : [];
 
     for (const toolId of selectedTools) {
-      const tool = AI_TOOLS.find((t) => t.value === toolId);
+      const tool = AI_TOOLS.find(t => t.value === toolId);
       if (!tool?.skillsDir) continue;
 
       const spinner = ora(`Setting up ${tool.name}...`).start();
 
       try {
-        const skillsDir = path.join(projectPath, tool.skillsDir, "skills");
+        const skillsDir = path.join(projectPath, tool.skillsDir, 'skills');
 
         // Create skill files when delivery includes skills
         if (shouldGenerateSkills) {
           for (const { template, dirName } of skillTemplates) {
             const skillDir = path.join(skillsDir, dirName);
-            const skillFile = path.join(skillDir, "SKILL.md");
+            const skillFile = path.join(skillDir, 'SKILL.md');
 
             // Use hyphen-based command references for OpenCode
             const transformer =
-              tool.value === "opencode" || tool.value === "pi"
+              tool.value === 'opencode' || tool.value === 'pi'
                 ? transformToHyphenCommands
                 : undefined;
             const skillContent = generateSkillContent(
@@ -911,9 +922,15 @@ export class UpdateCommand {
       return;
     }
 
-    const profileJsonPath = path.join(getPackageSchemasDir(), 'sdt', 'sdt-profile.json');
+    const profileJsonPath = path.join(
+      getPackageSchemasDir(),
+      'sdt',
+      'sdt-profile.json',
+    );
     if (!fs.existsSync(profileJsonPath)) {
-      console.log(chalk.dim('  sdt-profile.json not found, skipping schema generation'));
+      console.log(
+        chalk.dim('  sdt-profile.json not found, skipping schema generation'),
+      );
       return;
     }
 
@@ -921,11 +938,17 @@ export class UpdateCommand {
     try {
       profileJson = JSON.parse(fs.readFileSync(profileJsonPath, 'utf-8'));
     } catch {
-      console.warn('Failed to parse sdt-profile.json, skipping schema generation');
+      console.warn(
+        'Failed to parse sdt-profile.json, skipping schema generation',
+      );
       return;
     }
 
-    const packageSchemaPath = path.join(getPackageSchemasDir(), 'sdt', 'schema.yaml');
+    const packageSchemaPath = path.join(
+      getPackageSchemasDir(),
+      'sdt',
+      'schema.yaml',
+    );
     if (!fs.existsSync(packageSchemaPath)) {
       return;
     }
@@ -933,7 +956,9 @@ export class UpdateCommand {
     const fullSchema = parseSchema(fs.readFileSync(packageSchemaPath, 'utf-8'));
     const projectSchemasDir = getProjectSchemasDir(projectPath);
 
-    for (const [profileName, selectedWorkflows] of Object.entries(configProfiles)) {
+    for (const [profileName, selectedWorkflows] of Object.entries(
+      configProfiles,
+    )) {
       const selectedArtifactIds = new Set<string>();
       for (const workflow of selectedWorkflows) {
         const mapping = profileJson[workflow];
@@ -944,14 +969,16 @@ export class UpdateCommand {
         }
       }
 
-      const filteredArtifacts = (fullSchema.artifacts || []).filter(
-        (artifact) => selectedArtifactIds.has(artifact.id)
+      const filteredArtifacts = (fullSchema.artifacts || []).filter(artifact =>
+        selectedArtifactIds.has(artifact.id),
       );
 
-      const validArtifactIds = new Set(filteredArtifacts.map((a) => a.id));
+      const validArtifactIds = new Set(filteredArtifacts.map(a => a.id));
       for (const artifact of filteredArtifacts) {
         if (artifact.requires) {
-          artifact.requires = artifact.requires.filter((dep) => validArtifactIds.has(dep));
+          artifact.requires = artifact.requires.filter(dep =>
+            validArtifactIds.has(dep),
+          );
         }
       }
 
@@ -972,7 +999,67 @@ export class UpdateCommand {
       const profileSchemaPath = path.join(profileDir, 'schema.yaml');
 
       await FileSystemUtils.createDirectory(profileDir);
-      await FileSystemUtils.writeFile(profileSchemaPath, stringifyYaml(generatedSchema));
+      await FileSystemUtils.writeFile(
+        profileSchemaPath,
+        stringifyYaml(generatedSchema),
+      );
+    }
+  }
+
+  /**
+   * Sync profile between global config and project config.yaml.
+   * Priority: config.yaml > global config
+   * - If config.yaml has profile, update global config to match
+   * - If config.yaml doesn't have profile, write global config profile to it
+   */
+  private async syncProfileToConfig(
+    projectPath: string,
+    globalProfile: Profile,
+  ): Promise<void> {
+    const testspecDir = path.join(projectPath, TESTSPEC_DIR_NAME);
+    const configPath = path.join(testspecDir, 'config.yaml');
+    const configYmlPath = path.join(testspecDir, 'config.yml');
+
+    // Determine which config file exists (prefer .yaml)
+    let existingConfigPath: string | null = null;
+    if (fs.existsSync(configPath)) {
+      existingConfigPath = configPath;
+    } else if (fs.existsSync(configYmlPath)) {
+      existingConfigPath = configYmlPath;
+    }
+
+    // If no config file exists, nothing to sync
+    if (!existingConfigPath) {
+      return;
+    }
+
+    // Read existing project config
+    const projectConfig = readProjectConfig(projectPath);
+    const currentProfile = projectConfig?.profile;
+
+    // If config.yaml has profile, update global config to match (config.yaml has higher priority)
+    if (currentProfile) {
+      const globalConfig = getGlobalConfig();
+      if (globalConfig.profile !== currentProfile) {
+        globalConfig.profile = currentProfile;
+        saveGlobalConfig(globalConfig);
+      }
+      return;
+    }
+
+    // If config.yaml doesn't have profile but global config does, write to config.yaml
+    // This handles the case where config.yaml exists but was created before profile feature
+    if (!currentProfile && globalProfile) {
+      try {
+        const yamlContent = serializeConfig({
+          schema: projectConfig?.schema || 'spec-driven',
+          profile: globalProfile,
+          profiles: projectConfig?.profiles || DEFAULT_PROFILES,
+        });
+        await FileSystemUtils.writeFile(existingConfigPath, yamlContent);
+      } catch {
+        // Silently fail - profile sync is best-effort
+      }
     }
   }
 }

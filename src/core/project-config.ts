@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import path from 'path';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import type { Profile } from './global-config.js';
 
 /**
  * Zod schema for project configuration.
@@ -22,6 +23,12 @@ export const ProjectConfigSchema = z.object({
     .string()
     .min(1)
     .describe('The workflow schema to use (e.g., "spec-driven")'),
+
+  // Optional: profile mode (synced from global config)
+  profile: z
+    .enum(['core', 'custom', 'sdt'])
+    .optional()
+    .describe('The active profile mode (synced from global config)'),
 
   // Optional: project context (injected into all artifact instructions)
   // Max size: 50KB (enforced during parsing)
@@ -97,6 +104,17 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
       config.schema = schemaResult.data;
     } else if (raw.schema !== undefined) {
       console.warn(`Invalid 'schema' field in config (must be non-empty string)`);
+    }
+
+    // Parse profile field (synced from global config)
+    if (raw.profile !== undefined) {
+      const profileField = z.enum(['core', 'custom', 'sdt']);
+      const profileResult = profileField.safeParse(raw.profile);
+      if (profileResult.success) {
+        config.profile = profileResult.data;
+      } else {
+        console.warn(`Invalid 'profile' field in config (must be one of: core, custom, sdt)`);
+      }
     }
 
     // Parse context field with size limit
