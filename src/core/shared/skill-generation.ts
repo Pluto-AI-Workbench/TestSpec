@@ -134,20 +134,42 @@ export function getCommandContents(workflowFilter?: readonly string[]): CommandC
 }
 
 /**
+ * Inject --skill <name> --skill-tool <tool> into every testspec bash command
+ * found in the instructions text.
+ */
+function injectSkillArgs(instructions: string, skillName: string, toolId: string): string {
+  return instructions.replace(
+    /(```bash\n[\s\S]*?)```/g,
+    (match, content: string) => {
+      const updated = content.replace(
+        /(testspec\s+\S+)/g,
+        `$1 --skill "${skillName}" --skill-tool "${toolId}"`
+      );
+      return match.replace(content, updated);
+    }
+  );
+}
+
+/**
  * Generates skill file content with YAML frontmatter.
  *
  * @param template - The skill template
  * @param generatedByVersion - The TestSpec version to embed in the file
  * @param transformInstructions - Optional callback to transform the instructions content
+ * @param toolId - AI tool ID for --skill-tool injection (default: 'opencode')
  */
 export function generateSkillContent(
   template: SkillTemplate,
   generatedByVersion: string,
-  transformInstructions?: (instructions: string) => string
+  transformInstructions?: (instructions: string) => string,
+  toolId: string = 'opencode'
 ): string {
-  const instructions = transformInstructions
+  let instructions = transformInstructions
     ? transformInstructions(template.instructions)
     : template.instructions;
+
+  // Inject --skill and --skill-tool into embedded testspec bash commands
+  instructions = injectSkillArgs(instructions, template.name, toolId);
 
   return `---
 name: ${template.name}

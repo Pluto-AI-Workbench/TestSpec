@@ -255,6 +255,7 @@ export class UpdateCommand {
               template,
               TESTSPEC_VERSION,
               transformer,
+              tool.value,
             );
             await FileSystemUtils.writeFile(skillFile, skillContent);
           }
@@ -277,6 +278,7 @@ export class UpdateCommand {
             const generatedCommands = generateCommands(
               commandContents,
               adapter,
+              tool.value,
             );
 
             for (const cmd of generatedCommands) {
@@ -858,6 +860,7 @@ export class UpdateCommand {
               template,
               TESTSPEC_VERSION,
               transformer,
+              tool.value,
             );
             await FileSystemUtils.writeFile(skillFile, skillContent);
           }
@@ -870,6 +873,7 @@ export class UpdateCommand {
             const generatedCommands = generateCommands(
               commandContents,
               adapter,
+              tool.value,
             );
 
             for (const cmd of generatedCommands) {

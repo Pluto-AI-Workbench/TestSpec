@@ -547,7 +547,7 @@ export class InitCommand {
             // Generate SKILL.md content with YAML frontmatter including generatedBy
             // Use hyphen-based command references for tools where filename = command name
             const transformer = (tool.value === 'opencode' || tool.value === 'pi') ? transformToHyphenCommands : undefined;
-            const skillContent = generateSkillContent(template, TESTSPEC_VERSION, transformer);
+            const skillContent = generateSkillContent(template, TESTSPEC_VERSION, transformer, tool.value);
 
             // Write the skill file
             await FileSystemUtils.writeFile(skillFile, skillContent);
@@ -562,7 +562,7 @@ export class InitCommand {
         if (shouldGenerateCommands) {
           const adapter = CommandAdapterRegistry.get(tool.value);
           if (adapter) {
-            const generatedCommands = generateCommands(commandContents, adapter);
+            const generatedCommands = generateCommands(commandContents, adapter, tool.value);
 
             for (const cmd of generatedCommands) {
               const commandFile = path.isAbsolute(cmd.path) ? cmd.path : path.join(projectPath, cmd.path);
