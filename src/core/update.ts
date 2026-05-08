@@ -50,7 +50,12 @@ import {
 import {
   scanInstalledWorkflows as scanInstalledWorkflowsShared,
   migrateIfNeeded as migrateIfNeededShared,
-} from "./migration.js";
+
+} from './migration.js';
+import { readProjectConfig } from './project-config.js';
+import { getProjectSchemasDir, getPackageSchemasDir } from './artifact-graph/resolver.js';
+import { parseSchema } from './artifact-graph/schema.js';
+import { stringify as stringifyYaml } from 'yaml';
 
 const require = createRequire(import.meta.url);
 const { version: TESTSPEC_VERSION } = require("../../package.json");
@@ -118,6 +123,9 @@ export class UpdateCommand {
     );
     const shouldGenerateSkills = delivery !== "commands";
     const shouldGenerateCommands = delivery !== "skills";
+
+    // 3.1 Generate customized schema from config profiles
+    await this.generateSchemaFromConfig(resolvedProjectPath);
 
     // 4. Detect and handle legacy artifacts + upgrade legacy tools using effective config
     const newlyConfiguredTools = await this.handleLegacyCleanup(
@@ -491,13 +499,13 @@ export class UpdateCommand {
     }
 
     const workflowSet = new Set(workflows);
-    const matchesOldCore =
-      workflowSet.size === OLD_CORE_WORKFLOWS.length &&
-      OLD_CORE_WORKFLOWS.every((workflow) => workflowSet.has(workflow));
+    // const matchesOldCore =
+    //   workflowSet.size === OLD_CORE_WORKFLOWS.length &&
+    //   OLD_CORE_WORKFLOWS.every((workflow) => workflowSet.has(workflow));
 
-    if (!matchesOldCore) {
-      return;
-    }
+    // if (!matchesOldCore) {
+    //   return;
+    // }
 
     console.log(
       chalk.dim(
@@ -890,5 +898,81 @@ export class UpdateCommand {
     }
 
     return newlyConfigured;
+  }
+
+  private async generateSchemaFromConfig(projectPath: string): Promise<void> {
+    const projectConfig = readProjectConfig(projectPath);
+    if (!projectConfig) {
+      return;
+    }
+
+    const configProfiles = projectConfig.profiles;
+    if (!configProfiles || Object.keys(configProfiles).length === 0) {
+      return;
+    }
+
+    const profileJsonPath = path.join(getPackageSchemasDir(), 'sdt', 'sdt-profile.json');
+    if (!fs.existsSync(profileJsonPath)) {
+      console.log(chalk.dim('  sdt-profile.json not found, skipping schema generation'));
+      return;
+    }
+
+    let profileJson: Record<string, { artifacts: string[] }>;
+    try {
+      profileJson = JSON.parse(fs.readFileSync(profileJsonPath, 'utf-8'));
+    } catch {
+      console.warn('Failed to parse sdt-profile.json, skipping schema generation');
+      return;
+    }
+
+    const packageSchemaPath = path.join(getPackageSchemasDir(), 'sdt', 'schema.yaml');
+    if (!fs.existsSync(packageSchemaPath)) {
+      return;
+    }
+
+    const fullSchema = parseSchema(fs.readFileSync(packageSchemaPath, 'utf-8'));
+    const projectSchemasDir = getProjectSchemasDir(projectPath);
+
+    for (const [profileName, selectedWorkflows] of Object.entries(configProfiles)) {
+      const selectedArtifactIds = new Set<string>();
+      for (const workflow of selectedWorkflows) {
+        const mapping = profileJson[workflow];
+        if (mapping && mapping.artifacts) {
+          for (const artifactId of mapping.artifacts) {
+            selectedArtifactIds.add(artifactId);
+          }
+        }
+      }
+
+      const filteredArtifacts = (fullSchema.artifacts || []).filter(
+        (artifact) => selectedArtifactIds.has(artifact.id)
+      );
+
+      const validArtifactIds = new Set(filteredArtifacts.map((a) => a.id));
+      for (const artifact of filteredArtifacts) {
+        if (artifact.requires) {
+          artifact.requires = artifact.requires.filter((dep) => validArtifactIds.has(dep));
+        }
+      }
+
+      let applyConfig = fullSchema.apply;
+      if (!selectedWorkflows.includes('sdt-build')) {
+        applyConfig = undefined;
+      }
+
+      const generatedSchema = {
+        name: profileName,
+        version: fullSchema.version,
+        description: `${profileName} - Customized from SDT`,
+        artifacts: filteredArtifacts,
+        ...(applyConfig ? { apply: applyConfig } : {}),
+      };
+
+      const profileDir = path.join(projectSchemasDir, profileName);
+      const profileSchemaPath = path.join(profileDir, 'schema.yaml');
+
+      await FileSystemUtils.createDirectory(profileDir);
+      await FileSystemUtils.writeFile(profileSchemaPath, stringifyYaml(generatedSchema));
+    }
   }
 }
