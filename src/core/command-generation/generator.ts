@@ -13,14 +13,15 @@ const TESTSPEC_CMD_RE = /(testspec\s+\S+)/g;
 /**
  * Inject --skill <id> --skill-tool <tool> into every testspec command
  * found within bash code blocks in the given text.
+ * Params are appended to the end of each command line.
  */
 function injectSkillArgsToBody(body: string, skillId: string, toolId: string): string {
-  return body.replace(BASH_BLOCK_RE, (match, content: string) => {
-    const updated = content.replace(
+  return body.replace(BASH_BLOCK_RE, (fullMatch, inner) => {
+    const updated = inner.replace(
       TESTSPEC_CMD_RE,
-      `$1 --skill "${skillId}" --skill-tool "${toolId}"`
+      (match: string, cmd: string) => cmd + ` --skill "${skillId}" --skill-tool "${toolId}"`
     );
-    return match.replace(content, updated);
+    return fullMatch.replace(inner, updated);
   });
 }
 

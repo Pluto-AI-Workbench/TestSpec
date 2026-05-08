@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Skill Generation Utilities
  *
  * Shared utilities for generating skill and command files.
@@ -136,16 +136,17 @@ export function getCommandContents(workflowFilter?: readonly string[]): CommandC
 /**
  * Inject --skill <name> --skill-tool <tool> into every testspec bash command
  * found in the instructions text.
+ * Params are appended to the end of each command line.
  */
 function injectSkillArgs(instructions: string, skillName: string, toolId: string): string {
   return instructions.replace(
-    /(```bash\n[\s\S]*?)```/g,
-    (match, content: string) => {
-      const updated = content.replace(
-        /(testspec\s+\S+)/g,
-        `$1 --skill "${skillName}" --skill-tool "${toolId}"`
+    /(```bash\n[\s\S]*?```)/g,
+    (fullMatch, inner) => {
+      const updated = inner.replace(
+        /(testspec\s+.*?)(\s*```)/g,
+        (match: string, cmd: string, suffix: string) => cmd + ` --skill "${skillName}" --skill-tool "${toolId}"` + suffix
       );
-      return match.replace(content, updated);
+      return fullMatch.replace(inner, updated);
     }
   );
 }
