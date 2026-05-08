@@ -124,11 +124,12 @@ export function getConfigProfileNames(projectRoot?: string): string[] {
 /**
  * Resolves which workflows should be active for a given profile configuration.
  *
- * Reads ONLY from config.yaml profiles field. No fallback to DEFAULT_PROFILES.
- * If config.yaml doesn't exist or profiles field is empty, returns empty array.
+ * Reads from config.yaml profiles field first. Falls back to DEFAULT_PROFILES for known
+ * built-in profiles (core, sdt, custom) if config.yaml is missing or profile not found.
+ * Unknown profile values return empty array.
  *
  * - 'custom' profile returns customWorkflows if provided (from global config)
- * - Other profile names are looked up in config.yaml profiles
+ * - Other profile names are looked up in config.yaml profiles, then DEFAULT_PROFILES
  */
 export function getProfileWorkflows(
   profile: Profile,
@@ -178,7 +179,11 @@ export function getProfileWorkflows(
       }
       return workflows;
     }
-    // custom profile without config and without customWorkflows
+    // custom profile without config and without customWorkflows - fallback to DEFAULT_PROFILES
+    if (DEFAULT_PROFILES[profile]) {
+      console.warn(`Warning: Profile 'custom' not defined in config. Using built-in default.`);
+      return DEFAULT_PROFILES[profile];
+    }
     console.warn(`Warning: Profile 'custom' not defined in config and no custom workflows provided.`);
     return [];
   }
@@ -195,7 +200,14 @@ export function getProfileWorkflows(
     return workflows;
   }
 
-  // Profile not found in config - NO FALLBACK to DEFAULT_PROFILES
+  // Profile not found in config - fallback to DEFAULT_PROFILES if available
+  const defaultWorkflows = DEFAULT_PROFILES[profile];
+  if (defaultWorkflows) {
+    console.warn(`Warning: Profile '${profile}' not found in testspec/config.yaml. Using built-in default.`);
+    return defaultWorkflows;
+  }
+
+  // Unknown profile - return empty array
   console.warn(`Warning: Profile '${profile}' not found in testspec/config.yaml.`);
   if (configProfiles && Object.keys(configProfiles).length > 0) {
     console.warn(`Available profiles: ${Object.keys(configProfiles).join(", ")}`);

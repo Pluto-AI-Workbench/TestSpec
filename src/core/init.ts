@@ -151,8 +151,10 @@ export class InitCommand {
     // Generate skills and commands for each tool
     const results = await this.generateSkillsAndCommands(projectPath, validatedTools);
 
-    // Create config.yaml if needed
-    const configStatus = await this.createConfig(testspecPath, extendMode);
+    // Create config.yaml if needed (use profile from CLI or global config)
+    const globalConfig = getGlobalConfig();
+    const profileForConfig = (this.profileOverride ?? globalConfig.profile ?? DEFAULT_PROJECT_PROFILE) as Profile;
+    const configStatus = await this.createConfig(testspecPath, extendMode, profileForConfig);
 
     // Display success message
     this.displaySuccessMessage(projectPath, validatedTools, results, configStatus);
@@ -603,7 +605,7 @@ export class InitCommand {
   // CONFIG FILE
   // ═══════════════════════════════════════════════════════════
 
-  private async createConfig(testspecPath: string, extendMode: boolean): Promise<'created' | 'exists' | 'skipped'> {
+  private async createConfig(testspecPath: string, extendMode: boolean, profile?: Profile): Promise<'created' | 'exists' | 'skipped'> {
     const configPath = path.join(testspecPath, 'config.yaml');
     const configYmlPath = path.join(testspecPath, 'config.yml');
     const configYamlExists = fs.existsSync(configPath);
@@ -619,12 +621,11 @@ export class InitCommand {
     }
 
     try {
-      // Use project-level default profile (not from global config)
-      // Priority: config.yaml > project default
-      // When creating new config, use project default
+      // Use profile from CLI override, global config, or project default
+      const profileToUse = profile ?? DEFAULT_PROJECT_PROFILE;
       const yamlContent = serializeConfig({
         schema: DEFAULT_SCHEMA,
-        profile: DEFAULT_PROJECT_PROFILE,
+        profile: profileToUse,
         profiles: DEFAULT_PROFILES
       });
       await FileSystemUtils.writeFile(configPath, yamlContent);
