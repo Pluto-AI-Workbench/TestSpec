@@ -19,7 +19,7 @@ import {
 } from './config.js';
 import { PALETTE } from './styles/palette.js';
 import { isInteractive } from '../utils/interactive.js';
-import { serializeConfig, DEFAULT_PROFILES } from './config-prompts.js';
+import { serializeConfig, DEFAULT_PROFILES, DEFAULT_PROJECT_PROFILE } from './config-prompts.js';
 import {
   generateCommands,
   CommandAdapterRegistry,
@@ -151,8 +151,10 @@ export class InitCommand {
     // Generate skills and commands for each tool
     const results = await this.generateSkillsAndCommands(projectPath, validatedTools);
 
-    // Create config.yaml if needed
-    const configStatus = await this.createConfig(testspecPath, extendMode);
+    // Create config.yaml if needed (use profile from CLI or global config)
+    const globalConfig = getGlobalConfig();
+    const profileForConfig = (this.profileOverride ?? globalConfig.profile ?? DEFAULT_PROJECT_PROFILE) as Profile;
+    const configStatus = await this.createConfig(testspecPath, extendMode, profileForConfig);
 
     // Display success message
     this.displaySuccessMessage(projectPath, validatedTools, results, configStatus);
@@ -603,7 +605,7 @@ export class InitCommand {
   // CONFIG FILE
   // ═══════════════════════════════════════════════════════════
 
-  private async createConfig(testspecPath: string, extendMode: boolean): Promise<'created' | 'exists' | 'skipped'> {
+  private async createConfig(testspecPath: string, extendMode: boolean, profile?: Profile): Promise<'created' | 'exists' | 'skipped'> {
     const configPath = path.join(testspecPath, 'config.yaml');
     const configYmlPath = path.join(testspecPath, 'config.yml');
     const configYamlExists = fs.existsSync(configPath);
@@ -619,7 +621,13 @@ export class InitCommand {
     }
 
     try {
-      const yamlContent = serializeConfig({ schema: DEFAULT_SCHEMA, profiles: DEFAULT_PROFILES });
+      // Use profile from CLI override, global config, or project default
+      const profileToUse = profile ?? DEFAULT_PROJECT_PROFILE;
+      const yamlContent = serializeConfig({
+        schema: DEFAULT_SCHEMA,
+        profile: profileToUse,
+        profiles: DEFAULT_PROFILES
+      });
       await FileSystemUtils.writeFile(configPath, yamlContent);
       return 'created';
     } catch {

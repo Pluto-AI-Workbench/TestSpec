@@ -29,6 +29,8 @@ import {
 } from "../core/profiles.js";
 import { TESTSPEC_DIR_NAME } from "../core/config.js";
 import { hasProjectConfigDrift } from "../core/profile-sync-drift.js";
+import { readProjectConfig } from "../core/project-config.js";
+import { serializeConfig, DEFAULT_PROFILES } from "../core/config-prompts.js";
 
 type ProfileAction = "both" | "delivery" | "workflows" | "keep";
 
@@ -522,13 +524,41 @@ export function registerConfigCommand(program: Command): void {
       "Configure workflow profile (interactive picker or preset shortcut)",
     )
     .action(async (preset?: string) => {
+      // Helper to write profile to config.yaml
+      const writeToProjectConfig = async (profile: Profile) => {
+        const projectRoot = process.cwd();
+        const testspecDir = path.join(projectRoot, TESTSPEC_DIR_NAME);
+        const configPath = path.join(testspecDir, 'config.yaml');
+
+        if (!fs.existsSync(testspecDir)) {
+          return false; // testspec directory doesn't exist
+        }
+
+        try {
+          const projectConfig = readProjectConfig(projectRoot);
+          const yamlContent = serializeConfig({
+            schema: projectConfig?.schema || 'spec-driven',
+            profile: profile,
+            profiles: projectConfig?.profiles || DEFAULT_PROFILES,
+          });
+          fs.writeFileSync(configPath, yamlContent, 'utf-8');
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
       // Preset shortcut: `testspec config profile core` or `testspec config profile sdt` or custom profile name
       if (
         preset &&
         BUILTIN_PROFILES.includes(preset as (typeof BUILTIN_PROFILES)[number])
       ) {
+        // First write to config.yaml (if exists), then global config
+        const profile = preset as Profile;
+        await writeToProjectConfig(profile);
+
         const config = getGlobalConfig();
-        config.profile = preset as Profile;
+        config.profile = profile;
         // Clear workflows - they will be resolved from config.yaml when needed
         delete config.workflows;
         // Preserve delivery setting
@@ -544,10 +574,12 @@ export function registerConfigCommand(program: Command): void {
 
       // Check if it's a custom profile name (not a built-in preset)
       if (preset) {
-        // For custom profile names, check if config.yaml has this profile
-        // Just set it in global config - workflows will be resolved from config.yaml
+        // First write to config.yaml (if exists), then global config
+        const profile = preset as Profile;
+        await writeToProjectConfig(profile);
+
         const config = getGlobalConfig();
-        config.profile = preset as Profile;
+        config.profile = profile;
         delete config.workflows;
         saveGlobalConfig(config);
         console.log(
@@ -715,6 +747,10 @@ export function registerConfigCommand(program: Command): void {
         config.profile = nextState.profile;
         config.delivery = nextState.delivery;
         config.workflows = nextState.workflows;
+
+        // First write to config.yaml (if exists), then global config
+        await writeToProjectConfig(nextState.profile);
+
         saveGlobalConfig(config);
 
         // Check if inside an TestSpec project

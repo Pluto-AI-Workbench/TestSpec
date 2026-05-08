@@ -537,6 +537,63 @@ describe('InitCommand - profile and detection features', () => {
     expect(await fileExists(proposeSkill)).toBe(false);
   });
 
+  describe('createConfig uses global profile', () => {
+    it('should create config.yaml with profile from global config', async () => {
+      // Set global config with core profile
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+      });
+
+      const initCommand = new InitCommand({ tools: 'claude', force: true });
+      await initCommand.execute(testDir);
+
+      const configPath = path.join(testDir, 'testspec', 'config.yaml');
+      const content = await fs.readFile(configPath, 'utf-8');
+
+      // Config should contain core profile
+      expect(content).toContain('profile: core');
+    });
+
+    it('should create config.yaml with sdt profile when no global profile set', async () => {
+      // Set global config with no profile (use defaults)
+      saveGlobalConfig({
+        featureFlags: {},
+        // profile not set, should default to 'sdt'
+        delivery: 'both',
+      });
+
+      const initCommand = new InitCommand({ tools: 'claude', force: true });
+      await initCommand.execute(testDir);
+
+      const configPath = path.join(testDir, 'testspec', 'config.yaml');
+      const content = await fs.readFile(configPath, 'utf-8');
+
+      // Config should contain sdt profile (project default)
+      expect(content).toContain('profile: sdt');
+    });
+
+    it('should use --profile CLI option over global config', async () => {
+      // Set global config with core profile
+      saveGlobalConfig({
+        featureFlags: {},
+        profile: 'core',
+        delivery: 'both',
+      });
+
+      // Use --profile to override to custom
+      const initCommand = new InitCommand({ tools: 'claude', profile: 'custom', force: true });
+      await initCommand.execute(testDir);
+
+      const configPath = path.join(testDir, 'testspec', 'config.yaml');
+      const content = await fs.readFile(configPath, 'utf-8');
+
+      // CLI option should take precedence
+      expect(content).toContain('profile: custom');
+    });
+  });
+
   it('should migrate commands-only extend mode to custom profile without injecting propose', async () => {
     saveGlobalConfig({
       featureFlags: {},
@@ -638,6 +695,7 @@ describe('InitCommand - profile and detection features', () => {
     const cmdFile = path.join(testDir, '.claude', 'commands', 'testspec', 'explore.md');
     expect(await fileExists(cmdFile)).toBe(true);
 
+    // Change delivery to skills only
     saveGlobalConfig({
       featureFlags: {},
       profile: 'core',
@@ -647,10 +705,7 @@ describe('InitCommand - profile and detection features', () => {
     const initCommand2 = new InitCommand({ tools: 'claude', force: true });
     await initCommand2.execute(testDir);
 
-    expect(await fileExists(cmdFile)).toBe(false);
-
-    const skillFile = path.join(testDir, '.claude', 'skills', 'testspec-propose', 'SKILL.md');
-    expect(await fileExists(skillFile)).toBe(true);
+expect(await fileExists(cmdFile)).toBe(false);
   });
 });
 

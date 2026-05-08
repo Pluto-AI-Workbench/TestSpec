@@ -1,15 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   CORE_WORKFLOWS,
   ALL_WORKFLOWS,
   getProfileWorkflows,
 } from '../../src/core/profiles.js';
+import { DEFAULT_PROFILES } from '../../src/core/config-prompts.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('profiles', () => {
   describe('CORE_WORKFLOWS', () => {
     it('should contain the default core workflows', () => {
-      expect(CORE_WORKFLOWS).toEqual(['propose', 'explore', 'apply', 'sync', 'archive']);
+      expect(CORE_WORKFLOWS).toEqual(['propose', 'explore', 'apply', 'archive']);
     });
 
     it('should be a subset of ALL_WORKFLOWS', () => {
@@ -35,30 +41,78 @@ describe('profiles', () => {
   });
 
   describe('getProfileWorkflows', () => {
-    it('should return core workflows for core profile', () => {
-      const result = getProfileWorkflows('core');
-      expect(result).toEqual(CORE_WORKFLOWS);
+    // Test helpers for isolated config.yaml testing
+    const testDir = path.join(__dirname, 'fixtures', 'profile-test-temp');
+    const configPath = path.join(testDir, 'testspec', 'config.yaml');
+
+    beforeEach(() => {
+      // Create temp directory structure
+      fs.mkdirSync(path.join(testDir, 'testspec'), { recursive: true });
     });
 
-    it('should return core workflows for core profile even if customWorkflows provided', () => {
-      const result = getProfileWorkflows('core', ['new', 'apply']);
-      expect(result).toEqual(CORE_WORKFLOWS);
+    afterEach(() => {
+      // Clean up temp directory
+      try {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
     });
 
-    it('should return custom workflows for custom profile', () => {
-      const customWorkflows = ['explore', 'new', 'apply', 'ff'];
-      const result = getProfileWorkflows('custom', customWorkflows);
-      expect(result).toEqual(customWorkflows);
+    describe('with config.yaml missing', () => {
+      it('should return DEFAULT_PROFILES for sdt profile', () => {
+        const result = getProfileWorkflows('sdt', undefined, testDir);
+        expect(result).toEqual(DEFAULT_PROFILES['sdt']);
+      });
+
+      it('should return DEFAULT_PROFILES for core profile', () => {
+        const result = getProfileWorkflows('core', undefined, testDir);
+        expect(result).toEqual(DEFAULT_PROFILES['core']);
+      });
+
+      it('should return DEFAULT_PROFILES for custom profile without customWorkflows', () => {
+        const result = getProfileWorkflows('custom', undefined, testDir);
+        expect(result).toEqual(DEFAULT_PROFILES['custom']);
+      });
+
+      it('should return customWorkflows for custom profile when provided', () => {
+        const customWorkflows = ['explore', 'new', 'apply', 'ff'];
+        const result = getProfileWorkflows('custom', customWorkflows, testDir);
+        expect(result).toEqual(customWorkflows);
+      });
+
+      it('should return empty array for unknown profile', () => {
+        const result = getProfileWorkflows('unknown-profile' as any, undefined, testDir);
+        expect(result).toEqual([]);
+      });
     });
 
-    it('should return empty array for custom profile with no customWorkflows', () => {
-      const result = getProfileWorkflows('custom');
-      expect(result).toEqual(ALL_WORKFLOWS);
-    });
+    describe('with config.yaml present', () => {
+      it('should return config.yaml profiles when available', () => {
+        // Create config.yaml with custom profiles
+        const yamlContent = `
+profiles:
+  custom:
+    - propose
+    - explore
+`;
+        fs.writeFileSync(configPath, yamlContent);
 
-    it('should return empty array for custom profile with empty customWorkflows', () => {
-      const result = getProfileWorkflows('custom', []);
-      expect(result).toEqual([]);
+        const result = getProfileWorkflows('custom', undefined, testDir);
+        expect(result).toEqual(['propose', 'explore']);
+      });
+
+      it('should prefer config over DEFAULT_PROFILES', () => {
+        const yamlContent = `
+profiles:
+  sdt:
+    - propose
+`;
+        fs.writeFileSync(configPath, yamlContent);
+
+        const result = getProfileWorkflows('sdt', undefined, testDir);
+        expect(result).toEqual(['propose']);
+      });
     });
   });
 });
