@@ -22,14 +22,16 @@ export async function runBuiltinChecks(
 
   if (!fs.existsSync(dir)) {
     throw new Error(
-      `[内置校验] 工件 "${artifactId}" 的输出目录不存在: ${dir}`
+      `[阻断] 工件 "${artifactId}" 的输出目录不存在: ${dir}\n` +
+      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
     );
   }
 
   // 2. Check if the output file(s) exist (supports glob patterns)
   if (!artifactOutputExists(changeDir, generates)) {
     throw new Error(
-      `[内置校验] 工件 "${artifactId}" 的输出文件不存在: ${generates}`
+      `[阻断] 工件 "${artifactId}" 的输出文件不存在: ${generates}\n` +
+      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
     );
   }
 }

@@ -1,6 +1,10 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 interface CheckContext {
   artifactId: string;
@@ -45,19 +49,23 @@ async function runSingleCheck(
 ): Promise<void> {
   const checksDir = path.join(projectRoot, 'checks');
 
-  // Try script files first: checks/{name}.ts or checks/{name}.js
+  // Try script files first: checks/{name}.ts, checks/{name}.js, or checks/{name}.py
   const tsPath = path.join(checksDir, `${checkName}.ts`);
   const jsPath = path.join(checksDir, `${checkName}.js`);
+  const pyPath = path.join(checksDir, `${checkName}.py`);
 
-  let filePath: string | null = null;
   if (fs.existsSync(tsPath)) {
-    filePath = tsPath;
-  } else if (fs.existsSync(jsPath)) {
-    filePath = jsPath;
+    await runScriptCheck(tsPath, checkName, artifactId, generates);
+    return;
   }
 
-  if (filePath) {
-    await runScriptCheck(filePath, checkName, artifactId, generates);
+  if (fs.existsSync(jsPath)) {
+    await runScriptCheck(jsPath, checkName, artifactId, generates);
+    return;
+  }
+
+  if (fs.existsSync(pyPath)) {
+    await runPythonCheck(pyPath, checkName, artifactId, generates, projectRoot);
     return;
   }
 
@@ -66,13 +74,15 @@ async function runSingleCheck(
   if (fs.existsSync(skillPath)) {
     // TODO: Implement AI-based skill check execution
     throw new Error(
-      `[自定义校验] SKILL.md 校验暂未实现: ${checkName}`
+      `[阻断] SKILL.md 校验暂未实现: ${checkName}\n` +
+      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
     );
   }
 
   // Neither found - throw error
   throw new Error(
-    `[自定义校验] 未找到校验文件: checks/${checkName}.ts、checks/${checkName}.js 或 checks/${checkName}/SKILL.md`
+    `[阻断] 未找到校验文件: checks/${checkName}.ts、checks/${checkName}.js、checks/${checkName}.py 或 checks/${checkName}/SKILL.md\n` +
+    `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
   );
 }
 
@@ -91,7 +101,8 @@ async function runScriptCheck(
 
   if (typeof checkFn !== 'function') {
     throw new Error(
-      `[自定义校验] 校验文件 "${checkName}" 未导出有效的检查函数（需要 default export 或 check export）`
+      `[阻断] 校验文件 "${checkName}" 未导出有效的检查函数（需要 default export 或 check export）\n` +
+      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
     );
   }
 
@@ -103,7 +114,69 @@ async function runScriptCheck(
 
   if (!result.passed) {
     throw new Error(
-      `[自定义校验] 工件 "${artifactId}" 的校验 "${checkName}" 失败: ${result.message || '未知错误'}`
+      `[阻断] 工件 "${artifactId}" 的校验 "${checkName}" 失败: ${result.message || '未知错误'}\n` +
+      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
     );
+  }
+}
+
+async function runPythonCheck(
+  filePath: string,
+  checkName: string,
+  artifactId: string,
+  generates: string,
+  projectRoot: string
+): Promise<void> {
+  // Prepare input context as JSON
+  const context: CheckContext = {
+    artifactId,
+    generatedPath: generates,
+  };
+  const inputJson = JSON.stringify(context);
+
+  try {
+    // Execute Python script with context as argument
+    const { stdout, stderr } = await execFileAsync('python', [filePath, inputJson], {
+      cwd: projectRoot,
+      timeout: 30000, // 30 second timeout
+    });
+
+    if (stderr) {
+      console.warn(`[自定义校验] Python 警告 (${checkName}): ${stderr}`);
+    }
+
+    // Parse JSON output
+    let result: CheckResult;
+    try {
+      result = JSON.parse(stdout.trim());
+    } catch {
+      throw new Error(
+        `[阻断] Python 脚本 "${checkName}" 输出格式错误，需要 JSON 格式: {"passed": true/false, "message": "..."}\n` +
+        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      );
+    }
+
+    // Validate result structure
+    if (typeof result.passed !== 'boolean') {
+      throw new Error(
+        `[阻断] Python 脚本 "${checkName}" 返回的 passed 字段必须是 boolean 类型\n` +
+        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      );
+    }
+
+    if (!result.passed) {
+      throw new Error(
+        `[阻断] 工件 "${artifactId}" 的校验 "${checkName}" 失败: ${result.message || '未知错误'}\n` +
+        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      );
+    }
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      throw new Error(
+        `[阻断] 未找到 Python 解释器，请确保 Python 已安装并在 PATH 中\n` +
+        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      );
+    }
+    throw error;
   }
 }

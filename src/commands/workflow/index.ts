@@ -19,4 +19,7 @@ export type { SchemasOptions } from './schemas.js';
 export { newChangeCommand } from './new-change.js';
 export type { NewChangeOptions } from './new-change.js';
 
+export { verifyArtifactCommand } from './verify-artifact.js';
+export type { VerifyArtifactOptions } from './verify-artifact.js';
+
 export { DEFAULT_SCHEMA } from './shared.js';

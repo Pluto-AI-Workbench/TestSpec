@@ -69,6 +69,13 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
      - Use \`template\` as the structure - fill in its sections
      - Apply \`context\` and \`rules\` as constraints when writing - but do NOT copy them into the file
      - Write to the output path specified in instructions
+   - **Verify the artifact**:
+     \`\`\`bash
+     testspec verify-artifact <artifact-id> --change "<name>"
+     \`\`\`
+     - If verification fails, STOP and report the errors to the user
+     - Do NOT attempt to fix the issues automatically
+     - Let the user fix the problems and re-run verification
    - Show what was created and what's now unlocked
    - STOP after creating ONE artifact
 
@@ -188,6 +195,13 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
      - Use \`template\` as the structure - fill in its sections
      - Apply \`context\` and \`rules\` as constraints when writing - but do NOT copy them into the file
      - Write to the output path specified in instructions
+   - **Verify the artifact**:
+     \`\`\`bash
+     testspec verify-artifact <artifact-id> --change "<name>"
+     \`\`\`
+     - If verification fails, STOP and report the errors to the user
+     - Do NOT attempt to fix the issues automatically
+     - Let the user fix the problems and re-run verification
    - Show what was created and what's now unlocked
    - STOP after creating ONE artifact
 
