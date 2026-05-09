@@ -60,6 +60,13 @@ export function getFfChangeSkillTemplate(): SkillTemplate {
       - Read any completed dependency files for context
       - Create the artifact file using \`template\` as the structure
       - Apply \`context\` and \`rules\` as constraints - but do NOT copy them into the file
+      - Verify the artifact:
+        \`\`\`bash
+        testspec verify-artifact <artifact-id> --change "<name>"
+        \`\`\`
+      - If verification fails, STOP and report the errors to the user
+      - Do NOT attempt to fix the issues automatically
+      - Let the user fix the problems and re-run verification
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all \`applyRequires\` artifacts are complete**
@@ -159,19 +166,26 @@ export function getOpsxFfCommandTemplate(): CommandTemplate {
         - \`instruction\`: Schema-specific guidance for this artifact type
         - \`outputPath\`: Where to write the artifact
         - \`dependencies\`: Completed artifacts to read for context
-      - Read any completed dependency files for context
-      - Create the artifact file using \`template\` as the structure
-      - Apply \`context\` and \`rules\` as constraints - but do NOT copy them into the file
-      - Show brief progress: "✓ Created <artifact-id>"
+       - Read any completed dependency files for context
+       - Create the artifact file using \`template\` as the structure
+       - Apply \`context\` and \`rules\` as constraints - but do NOT copy them into the file
+       - Verify the artifact:
+         \`\`\`bash
+         testspec verify-artifact <artifact-id> --change "<name>"
+         \`\`\`
+       - If verification fails, STOP and report the errors to the user
+       - Do NOT attempt to fix the issues automatically
+       - Let the user fix the problems and re-run verification
+       - Show brief progress: "✓ Created <artifact-id>"
 
-   b. **Continue until all \`applyRequires\` artifacts are complete**
-      - After creating each artifact, re-run \`testspec status --change "<name>" --json\`
-      - Check if every artifact ID in \`applyRequires\` has \`status: "done"\` in the artifacts array
-      - Stop when all \`applyRequires\` artifacts are done
+    b. **Continue until all \`applyRequires\` artifacts are complete**
+       - After creating each artifact, re-run \`testspec status --change "<name>" --json\`
+       - Check if every artifact ID in \`applyRequires\` has \`status: "done"\` in the artifacts array
+       - Stop when all \`applyRequires\` artifacts are done
 
-   c. **If an artifact requires user input** (unclear context):
-      - Use **AskUserQuestion tool** to clarify
-      - Then continue with creation
+    c. **If an artifact requires user input** (unclear context):
+       - Use **AskUserQuestion tool** to clarify
+       - Then continue with creation
 
 5. **Show final status**
    \`\`\`bash

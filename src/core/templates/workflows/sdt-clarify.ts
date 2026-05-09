@@ -66,41 +66,48 @@ export function getSdtClarifySkillTemplate(): SkillTemplate {
 
    按依赖顺序循环处理artifacts：
 
-   a. **对于每个 \`ready\` 状态的artifacts**：
-      - 获取指令：
-        \`\`\`bash
-        testspec instructions <artifactsID> --change "<名称>" --json
-        \`\`\`
-      - 指令 JSON 包含：
-        - \`context\`：项目背景（约束条件，不包含在输出中）
-        - \`rules\`：artifacts特定规则（约束条件，不包含在输出中）
-        - \`template\`：输出文件结构
-        - \`instruction\`：此artifacts类型的指导说明
-        - \`outputPath\`：artifacts输出路径
-        - \`dependencies\`：需要先读取的已完成artifacts
+    a. **对于每个 \`ready\` 状态的artifacts**：
+       - 获取指令：
+         \`\`\`bash
+         testspec instructions <artifactsID> --change "<名称>" --json
+         \`\`\`
+       - 指令 JSON 包含：
+         - \`context\`：项目背景（约束条件，不包含在输出中）
+         - \`rules\`：artifacts特定规则（约束条件，不包含在输出中）
+         - \`template\`：输出文件结构
+         - \`instruction\`：此artifacts类型的指导说明
+         - \`outputPath\`：artifacts输出路径
+         - \`dependencies\`：需要先读取的已完成artifacts
 
-      - 如果 \`instruction\` 或 \`context\` 中有需要用户确认的内容，使用 **Question 工具** 询问：
-        - clarify-sdt-requirements 阶段：
-          - "测试范围是否包括以下模块？[列出检测到的模块]"
-          - "是否有非测试范围内的功能需要排除？"
-          - "测试环境地址是否正确？[检测到的地址]"
-        - clarify-sdt-spec 阶段：
-          - "接口定义中的参数类型和约束是否正确？"
-          - "业务规则的描述是否符合你的预期？"
-          - "边界条件的覆盖是否完整？"
+       - 如果 \`instruction\` 或 \`context\` 中有需要用户确认的内容，使用 **Question 工具** 询问：
+         - clarify-sdt-requirements 阶段：
+           - "测试范围是否包括以下模块？[列出检测到的模块]"
+           - "是否有非测试范围内的功能需要排除？"
+           - "测试环境地址是否正确？[检测到的地址]"
+         - clarify-sdt-spec 阶段：
+           - "接口定义中的参数类型和约束是否正确？"
+           - "业务规则的描述是否符合你的预期？"
+           - "边界条件的覆盖是否完整？"
 
-      - 读取已完成依赖artifacts获取上下文
-      - 使用 \`template\` 作为结构创建artifacts文件
-      - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
-      - 标记 todo 为完成："已创建 <artifactsID>"
-      - 显示简要进度："已创建 <artifactsID>"
+       - 读取已完成依赖artifacts获取上下文
+       - 使用 \`template\` 作为结构创建artifacts文件
+       - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
+       - 验证 artifacts：
+         \`\`\`bash
+         testspec verify-artifact <artifactsID> --change "<名称>"
+         \`\`\`
+       - 如果验证失败，停止执行并向用户报告错误
+       - 不要尝试自动修复问题
+       - 让用户修复问题后重新运行校验
+       - 标记 todo 为完成："已创建 <artifactsID>"
+       - 显示简要进度："已创建 <artifactsID>"
 
-   b. **创建每个artifacts后，更新状态**
+    b. **创建每个artifacts后，更新状态**
 
-      \`\`\`bash
-      testspec status --change "<名称>" --json
-      \`\`\`
-      确认artifacts状态已变为 \`done\`
+       \`\`\`bash
+       testspec status --change "<名称>" --json
+       \`\`\`
+       确认artifacts状态已变为 \`done\`
 
 5. **标记 todo 项目完成**
 
@@ -223,28 +230,35 @@ export function getOpsxSdtClarifyCommandTemplate(): CommandTemplate {
         - \`outputPath\`：artifacts输出路径
         - \`dependencies\`：需要先读取的已完成artifacts
 
-      - 如果 \`instruction\` 或 \`context\` 中有需要用户确认的内容，使用 **Question 工具** 询问：
-        - clarify-sdt-requirements 阶段：
-          - "测试范围是否包括以下模块？[列出检测到的模块]"
-          - "是否有非测试范围内的功能需要排除？"
-          - "测试环境地址是否正确？[检测到的地址]"
-        - clarify-sdt-spec 阶段：
-          - "接口定义中的参数类型和约束是否正确？"
-          - "业务规则的描述是否符合你的预期？"
-          - "边界条件的覆盖是否完整？"
+       - 如果 \`instruction\` 或 \`context\` 中有需要用户确认的内容，使用 **Question 工具** 询问：
+         - clarify-sdt-requirements 阶段：
+           - "测试范围是否包括以下模块？[列出检测到的模块]"
+           - "是否有非测试范围内的功能需要排除？"
+           - "测试环境地址是否正确？[检测到的地址]"
+         - clarify-sdt-spec 阶段：
+           - "接口定义中的参数类型和约束是否正确？"
+           - "业务规则的描述是否符合你的预期？"
+           - "边界条件的覆盖是否完整？"
 
-      - 读取已完成依赖artifacts获取上下文
-      - 使用 \`template\` 作为结构创建artifacts文件
-      - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
-      - 标记 todo 为完成："已创建 <artifactsID>"
-      - 显示简要进度："已创建 <artifactsID>"
+       - 读取已完成依赖artifacts获取上下文
+       - 使用 \`template\` 作为结构创建artifacts文件
+       - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
+       - 验证 artifacts：
+         \`\`\`bash
+         testspec verify-artifact <artifactsID> --change "<名称>"
+         \`\`\`
+       - 如果验证失败，停止执行并向用户报告错误
+       - 不要尝试自动修复问题
+       - 让用户修复问题后重新运行校验
+       - 标记 todo 为完成："已创建 <artifactsID>"
+       - 显示简要进度："已创建 <artifactsID>"
 
-   b. **创建每个artifacts后，更新状态**
+    b. **创建每个artifacts后，更新状态**
 
-      \`\`\`bash
-      testspec status --change "<名称>" --json
-      \`\`\`
-      确认artifacts状态已变为 \`done\`
+       \`\`\`bash
+       testspec status --change "<名称>" --json
+       \`\`\`
+       确认artifacts状态已变为 \`done\`
 
 5. **标记 todo 项目完成**
 

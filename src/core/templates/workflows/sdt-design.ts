@@ -81,25 +81,32 @@ export function getSdtDesignSkillTemplate(): SkillTemplate {
         - \`outputPath\`：artifacts输出路径
         - \`dependencies\`：需要先读取的已完成artifacts
 
-      - 如果需要用户确认关键设计决策，使用 **Question 工具** 询问：
-        - design-test-points 阶段：
-          - "测试要点覆盖是否完整？是否有遗漏的功能点？"
-          - "边界条件测试是否足够？"
-        - design-manual-case 阶段：
-          - "手工案例的优先级划分是否合理？"
-          - "是否需要补充异常场景案例？"
+       - 如果需要用户确认关键设计决策，使用 **Question 工具** 询问：
+         - design-test-points 阶段：
+           - "测试要点覆盖是否完整？是否有遗漏的功能点？"
+           - "边界条件测试是否足够？"
+         - design-manual-case 阶段：
+           - "手工案例的优先级划分是否合理？"
+           - "是否需要补充异常场景案例？"
 
-      - 读取已完成依赖artifacts获取上下文（clarify-sdt-spec 是设计阶段的必要输入）
-      - 使用 \`template\` 作为结构创建artifacts文件
-      - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
-      - 标记 todo 为完成："已创建 <artifactsID>"
-      - 显示简要进度："已创建 <artifactsID>"
+       - 读取已完成依赖artifacts获取上下文（clarify-sdt-spec 是设计阶段的必要输入）
+       - 使用 \`template\` 作为结构创建artifacts文件
+       - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
+       - 验证 artifacts：
+         \`\`\`bash
+         testspec verify-artifact <artifactsID> --change "<名称>"
+         \`\`\`
+       - 如果验证失败，停止执行并向用户报告错误
+       - 不要尝试自动修复问题
+       - 让用户修复问题后重新运行校验
+       - 标记 todo 为完成："已创建 <artifactsID>"
+       - 显示简要进度："已创建 <artifactsID>"
 
-   b. **创建每个artifacts后，更新状态**
-      \`\`\`bash
-      testspec status --change "<名称>" --json
-      \`\`\`
-      确认artifacts状态已变为 \`done\`
+    b. **创建每个artifacts后，更新状态**
+       \`\`\`bash
+       testspec status --change "<名称>" --json
+       \`\`\`
+       确认artifacts状态已变为 \`done\`
 
 5. **标记 todo 项目完成**
 
@@ -237,25 +244,32 @@ export function getOpsxSdtDesignCommandTemplate(): CommandTemplate {
         - \`outputPath\`：artifacts输出路径
         - \`dependencies\`：需要先读取的已完成artifacts
 
-      - 如果需要用户确认关键设计决策，使用 **Question 工具** 询问：
-        - design-test-points 阶段：
-          - "测试要点覆盖是否完整？是否有遗漏的功能点？"
-          - "边界条件测试是否足够？"
-        - design-manual-case 阶段：
-          - "手工案例的优先级划分是否合理？"
-          - "是否需要补充异常场景案例？"
+       - 如果需要用户确认关键设计决策，使用 **Question 工具** 询问：
+         - design-test-points 阶段：
+           - "测试要点覆盖是否完整？是否有遗漏的功能点？"
+           - "边界条件测试是否足够？"
+         - design-manual-case 阶段：
+           - "手工案例的优先级划分是否合理？"
+           - "是否需要补充异常场景案例？"
 
-      - 读取已完成依赖artifacts获取上下文（clarify-sdt-spec 是设计阶段的必要输入）
-      - 使用 \`template\` 作为结构创建artifacts文件
-      - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
-      - 标记 todo 为完成："已创建 <artifactsID>"
-      - 显示简要进度："已创建 <artifactsID>"
+       - 读取已完成依赖artifacts获取上下文（clarify-sdt-spec 是设计阶段的必要输入）
+       - 使用 \`template\` 作为结构创建artifacts文件
+       - 将 \`context\` 和 \`rules\` 作为约束应用，但不复制到文件中
+       - 验证 artifacts：
+         \`\`\`bash
+         testspec verify-artifact <artifactsID> --change "<名称>"
+         \`\`\`
+       - 如果验证失败，停止执行并向用户报告错误
+       - 不要尝试自动修复问题
+       - 让用户修复问题后重新运行校验
+       - 标记 todo 为完成："已创建 <artifactsID>"
+       - 显示简要进度："已创建 <artifactsID>"
 
-   b. **创建每个artifacts后，更新状态**
-      \`\`\`bash
-      testspec status --change "<名称>" --json
-      \`\`\`
-      确认artifacts状态已变为 \`done\`
+    b. **创建每个artifacts后，更新状态**
+       \`\`\`bash
+       testspec status --change "<名称>" --json
+       \`\`\`
+       确认artifacts状态已变为 \`done\`
 
 5. **标记 todo 项目完成**
 

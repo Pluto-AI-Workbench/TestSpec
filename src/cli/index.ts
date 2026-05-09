@@ -24,12 +24,14 @@ import {
   templatesCommand,
   schemasCommand,
   newChangeCommand,
+  verifyArtifactCommand,
   DEFAULT_SCHEMA,
   type StatusOptions,
   type InstructionsOptions,
   type TemplatesOptions,
   type SchemasOptions,
   type NewChangeOptions,
+  type VerifyArtifactOptions,
 } from '../commands/workflow/index.js';
 import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
 
@@ -502,6 +504,23 @@ newCmd
   .action(async (name: string, options: NewChangeOptions) => {
     try {
       await newChangeCommand(name, options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// Verify artifact command
+program
+  .command('verify-artifact [artifact]')
+  .description('Run built-in and custom checks for a generated artifact')
+  .option('--change <id>', 'Change name')
+  .option('--schema <name>', 'Schema override (auto-detected from config.yaml)')
+  .option('--json', 'Output as JSON')
+  .action(async (artifactId: string | undefined, options: VerifyArtifactOptions) => {
+    try {
+      await verifyArtifactCommand(artifactId, options);
     } catch (error) {
       console.log();
       ora().fail(`Error: ${(error as Error).message}`);
