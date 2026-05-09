@@ -23,7 +23,7 @@ export async function runBuiltinChecks(
   if (!fs.existsSync(dir)) {
     throw new Error(
       `[阻断] 工件 "${artifactId}" 的输出目录不存在: ${dir}\n` +
-      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
     );
   }
 
@@ -31,7 +31,7 @@ export async function runBuiltinChecks(
   if (!artifactOutputExists(changeDir, generates)) {
     throw new Error(
       `[阻断] 工件 "${artifactId}" 的输出文件不存在: ${generates}\n` +
-      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
     );
   }
 }

@@ -75,14 +75,14 @@ async function runSingleCheck(
     // TODO: Implement AI-based skill check execution
     throw new Error(
       `[阻断] SKILL.md 校验暂未实现: ${checkName}\n` +
-      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
     );
   }
 
   // Neither found - throw error
   throw new Error(
     `[阻断] 未找到校验文件: checks/${checkName}.ts、checks/${checkName}.js、checks/${checkName}.py 或 checks/${checkName}/SKILL.md\n` +
-    `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+    `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
   );
 }
 
@@ -102,7 +102,7 @@ async function runScriptCheck(
   if (typeof checkFn !== 'function') {
     throw new Error(
       `[阻断] 校验文件 "${checkName}" 未导出有效的检查函数（需要 default export 或 check export）\n` +
-      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
     );
   }
 
@@ -115,7 +115,7 @@ async function runScriptCheck(
   if (!result.passed) {
     throw new Error(
       `[阻断] 工件 "${artifactId}" 的校验 "${checkName}" 失败: ${result.message || '未知错误'}\n` +
-      `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+      `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
     );
   }
 }
@@ -152,7 +152,7 @@ async function runPythonCheck(
     } catch {
       throw new Error(
         `[阻断] Python 脚本 "${checkName}" 输出格式错误，需要 JSON 格式: {"passed": true/false, "message": "..."}\n` +
-        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+        `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
       );
     }
 
@@ -160,21 +160,21 @@ async function runPythonCheck(
     if (typeof result.passed !== 'boolean') {
       throw new Error(
         `[阻断] Python 脚本 "${checkName}" 返回的 passed 字段必须是 boolean 类型\n` +
-        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+        `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
       );
     }
 
     if (!result.passed) {
       throw new Error(
         `[阻断] 工件 "${artifactId}" 的校验 "${checkName}" 失败: ${result.message || '未知错误'}\n` +
-        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+        `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
       );
     }
   } catch (error: any) {
     if (error.code === 'ENOENT') {
       throw new Error(
         `[阻断] 未找到 Python 解释器，请确保 Python 已安装并在 PATH 中\n` +
-        `⛔ 必须停止执行：不要尝试其他方法继续后续工件，请先解决此阻断问题。`
+        `⛔ 停止执行并向用户报告错误,不要尝试自动修复问题。`
       );
     }
     throw error;
